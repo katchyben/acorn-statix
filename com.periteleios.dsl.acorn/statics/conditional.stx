@@ -1,0 +1,41 @@
+module statics/conditional
+
+imports statics/base
+imports statics/variable
+
+imports signatures/conditional-sig
+
+
+rules
+ 
+  // (if e1 then e2 else e3)
+ typeOfExp(s, exp@IfThen(e1, e2, e3)) = lub(T1, T2) :-
+    typeOfExp(s, e1) == BOOL(),
+    typeOfExp(s, e2) == T1, 
+    typeOfExp(s, e3) == T2,
+    equitype(T1, T2)
+    | error $[Types [T1] and [T2] are not comparable].
+    
+    
+ // (if e1 e2 else e3)
+ typeOfExp(s, exp@If(e1, e2, e3)) = lub(T1, T2) :-
+    typeOfExp(s, e1) == BOOL(),
+    typeOfExp(s, e2) == T1, 
+    typeOfExp(s, e3) == T2,
+    equitype(T1, T2)
+    | error $[Types [T1] and [T2] are not comparable].
+    
+    
+  // (e1 ? e2 : e3)
+ typeOfExp(s, exp@Ternary(e1, e2, e3)) = lub(T1, T2) :-
+    typeOfExp(s, e1) == BOOL(),
+    typeOfExp(s, e2) == T1, 
+    typeOfExp(s, e3) == T2,
+    equitype(T1, T2)
+    | error $[Types [T1] and [T2] are not comparable].
+ 
+  
+
+ 
+
+ 

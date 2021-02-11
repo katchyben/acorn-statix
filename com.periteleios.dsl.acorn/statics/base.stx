@@ -1,0 +1,222 @@
+module statics/base
+
+imports signatures/base-sig
+
+signature
+
+  sorts
+    TYPE // semantic type
+    BOOL // used as return values of functional constraints
+    FUNSIG = (list(TYPE) * TYPE) // type alias for a function signature
+  
+  constructors
+    TopType : TYPE
+ 
+  constructors // semantic types
+    UNTYPED : TYPE
+  
+  constructors
+    TRUE : BOOL
+    FALSE : BOOL
+
+  namespaces
+    Mod : String
+    Entity : string
+    Trait : string
+    Function : string
+    Variable : string
+    Table : string
+    
+  name-resolution
+    labels
+      P       // parent edge label for consecutive statements
+      F       // function edge label for embedding functions, templates and pages in a scope
+      EXTEND  // extend edge label for extending entities
+      INHERIT // inherit edge label for subclasses
+      IMPORT  // import edge label for importing the global scope and other modules
+      ROOT
+      
+     resolve
+      Mod
+      filter P* 
+      min $ < P, $ < IMPORT,  P < IMPORT 
+    resolve
+      Entity
+      filter P* F* EXTEND? INHERIT* IMPORT*
+      min $ < P, $ < F, $ < EXTEND, $ < INHERIT, $ < IMPORT, P < F, P < EXTEND, P < INHERIT, P < IMPORT, F < EXTEND, F < INHERIT, F < IMPORT, EXTEND < INHERIT, EXTEND < IMPORT, INHERIT < IMPORT
+    resolve
+      Trait
+      filter P* F* EXTEND? INHERIT* IMPORT*
+      min $ < P, $ < F, $ < EXTEND, $ < INHERIT, $ < IMPORT, P < F, P < EXTEND, P < INHERIT, P < IMPORT, F < EXTEND, F < INHERIT, F < IMPORT, EXTEND < INHERIT, EXTEND < IMPORT, INHERIT < IMPORT
+    resolve
+      Function
+      filter P* F* EXTEND? (INHERIT EXTEND?)* IMPORT*
+    resolve
+      Variable
+      filter P* F* EXTEND? (INHERIT EXTEND?)* IMPORT*
+      min $ < P, $ < F, $ < EXTEND, $ < INHERIT, $ < IMPORT, P < F, P < EXTEND, P < INHERIT, P < IMPORT, F < EXTEND, F < INHERIT, F < IMPORT, EXTEND < INHERIT, EXTEND < IMPORT, INHERIT < IMPORT
+   
+  relations
+    typeOfDecl         : occurrence -> TYPE
+    typeOfFunDecl      : occurrence -> FUNSIG
+    entity             : occurrence -> scope
+    typeOf : -> TYPE 
+
+rules // declare common rules and mappings
+
+  /*unitOk : scope * Start
+  unitOk(_, _) :- false | error $[This unit is not yet implemented].*/
+  
+  defOk : scope * Definition
+  defOk(_,_) :- false | error $[This definition is not yet implemented].
+  defsOk maps defOk(*, list(*))
+  
+  expOk : scope * Exp
+  expOk(s, exp) :- {T}
+    typeOfExp(s, exp) == T.
+
+rules // typing
+
+  typesOfExps maps typeOfExp(*, list(*)) = list(*)
+  typeOfExp : scope * Exp -> TYPE
+  typeOfExp(s, exp) = UNTYPED() :- false | error $[typing of expression [exp] is not yet implemented].
+
+  typeOfSimpleExp : scope * SimpleExp -> TYPE
+  typeOfSimpleExp(s, exp) = UNTYPED() :- false | error $[typing of expression [exp] is not yet implemented].
+
+  typesCompatible : list(TYPE) * list(TYPE) -> BOOL
+  typesCompatible([], []) = TRUE().
+  typesCompatible([], [_|_]) = FALSE().
+  typesCompatible([_|_], []) = FALSE().
+  typesCompatible([t1|t1s], [t2|t2s]) = andB(typeCompatibleB(t1, t2), typesCompatible(t1s, t2s)).
+
+  typesCompatibleWith maps typeCompatible(*, list(*))
+  typeCompatible : TYPE * TYPE
+  typeCompatible(T1, T2) :- typeCompatibleB(T1, T2) == TRUE().
+
+  typeCompatibleB : TYPE * TYPE -> BOOL
+  typeCompatibleB(T1, T2) = FALSE(). //default
+  typeCompatibleB(T, T) = TRUE(). // same type is always type compatible
+  
+rules
+  /*typeOf : scope -> TYPE
+  typeOf(s) = T :-
+    query typeOf
+      filter e and true
+      min /* */ and true
+      in s |-> [(_, T)].
+      
+  withType : TYPE -> scope
+    withType(T) = s :-
+    new s, !typeOf[T] in s.*/
+  
+  
+  declVars : scope * list((string * TYPE))
+  declVars(s, []).
+  declVars(s, [(x, t)|tail]) :-
+    declVar(s, x, t),
+    declVars(s, tail).
+
+  declVar : scope * string * TYPE
+  declVar(s, x, t) :-
+    s -> Variable{x} with typeOfDecl t,
+    noDuplicateVarDefs(s, x) | error $[Duplicate defition of [x] in this context].
+
+  noDuplicateVarDefs : scope * string
+  noDuplicateVarDefs(s, x) :-
+    query typeOfDecl filter P* and { Variable{x'} :- x' == x }
+                     min $ < P
+                     in s |-> [_].
+
+  noDuplicateVarDefsInSuper : scope * string
+  noDuplicateVarDefsInSuper(s_sub, x) :-
+    query typeOfDecl filter EXTEND? (INHERIT EXTEND?)* and { Variable{x'} :- x' == x }
+                     min $ < EXTEND, $ < INHERIT, EXTEND < INHERIT
+                     in s_sub |-> [_].
+   
+rules // well-typedness of ..
+
+  declOk : scope * Decl 
+  declOk(_,_) :- false | error $[This definition is not yet implemented].
+  declsOk maps declOk(*, list(*))
+
+rules // operations on types
+
+  subtype  : TYPE * TYPE
+  equitype : TYPE * TYPE 
+  
+  subtype(T, T).
+  
+  /**
+   * listLub(list)
+   * Returns the least upper bound of a list of types.
+   */
+  lub : TYPE * TYPE -> TYPE
+  lub(T, T) = T.
+  
+  listLub : list(TYPE) -> TYPE
+  listLub([]) = TopType() :- false | error "listLub is not well-defined for an empty list".
+  listLub([T]) = T.
+  listLub([T|Ts]) = lub(T, listLub(Ts)).
+  listLub([T1|[T2|[]]]) = lub(T1, T2).
+  listLub([T1|[T2|rest]]) = listLub([lub(T1, T2) | rest]).
+  
+  
+  equitype(T, T).
+  
+    
+rules
+  
+  inherits : scope * scope -> BOOL
+  inherits(s_sub, s_super) = result :- {query_result}
+    query () filter INHERIT* and { s :- s == s_super }
+             min $ < INHERIT
+             in s_sub |-> query_result,
+    result == inheritsHelper(query_result).
+
+  inheritsHelper : list((path * scope)) -> BOOL
+  inheritsHelper(_) = FALSE().
+  inheritsHelper([(_,_)]) = TRUE().
+  
+rules // utils
+
+  /**
+   * getRoot(s)
+   * Get the root scope. The root scope is the scope passed to
+   * statics/project!projectOk.
+   * All scopes have a path to the root scope and all paths to the root scope
+   * end with a ROOT edge.
+   */
+  getRoot : scope -> scope
+  getRoot(s) = s_root :- {occs}
+    query () filter P* ROOT in s |-> occs,
+    occs == [(_, s_root)] | error $[BUG: cannot resolve root scope from [s]. occs: [occs]].
+  
+
+  andB : BOOL * BOOL -> BOOL
+  andB(_, _) = FALSE().
+  andB(TRUE(), TRUE()) = TRUE().
+  
+
+  orB : BOOL * BOOL -> BOOL
+  orB(_, _) = FALSE().
+  orB(TRUE(), _) = TRUE().
+  orB(FALSE(), TRUE()) = TRUE().
+
+ 
+  equalB : BOOL * BOOL
+  equalB(b, b).
+  equalB(_, _) :- false.
+
+  minOfList : list(int) -> int
+  minOfList([]) = 100000.
+  minOfList([x|xs]) = z :- {y}
+    y == minOfList(xs),
+    z #= min(x,y).
+
+  pathLength : path -> int
+  pathLength(_PathEmpty(_)) = 0.
+  pathLength(_PathStep(p, _, _)) = x :- {x'}
+    x' == pathLength(p),
+    x #= x' + 1.
+  

@@ -1,0 +1,65 @@
+module statics/pattern
+
+imports statics/base
+imports statics/variable
+imports statics/type
+
+imports signatures/pattern-sig
+
+ 
+  
+rules // patterns
+  
+  typeOfExp(s, exp@Match(e, cases)) = T :- {S}
+    typeOfExp(s, e) == S,
+    typeOfCases(s, S, cases) == [T | _].
+  
+  typeOfCase : scope * TYPE * Case -> TYPE
+  typeOfCases maps typeOfCase(*, *, list(*)) = list(*)
+  
+  typeOfCase(s, S, exp@Case(p, e)) = T :- {s_case}
+    new s_case, s_case -P-> s, 
+    typeOfPat(s_case, p) == S,
+    typeOfExp(s_case, e) == T.
+  
+  typeOfPat : scope * Pat -> TYPE
+  
+  typeOfPat(s, exp@PatVar(x)) = T :-
+    variableType(s, x) == T.
+    
+  typeOfPat(s, exp@ExpParens(e)) = T :- 
+   typeOfExp(s, e) == T.
+   
+  typeOfPat(s, exp@ExpTyped(x, t)) = T :- 
+   variableType(s, x) == T.
+    
+  typeOfPat(s, exp@PatApp(p1, p2)) = T.
+ 
+ /*typeOfExp(s, exp@Match(e, cases)) = T :- {S}
+   typeOfExp(s, e) == S,
+   typeOfCases(s, S, cases) == [T | _].
+ 
+ typeOfCase : scope * TYPE * Case -> TYPE
+ typeOfCases maps typeOfCase(*, *, list(*)) = list(*)
+ 
+ typeOfCase(s, S, exp@Case(p, e)) = T :- {s_case}
+   new s_case, s_case -P-> s, 
+   typeOfPat(s_case, p) == S,
+   typeOfExp(s_case, e) == T.
+ 
+ typeOfPat : scope * Pat -> TYPE
+ 
+ typeOfPat(s, exp@PatVar(x)) = T :-
+   variableType(s, x) == T.
+  
+ typeOfPat(s, exp@PatApp(p1, p2)) = T.  
+ 
+ typeOfPat(s, exp@ExpParens(e)) = T :- 
+   typeOfExp(s, e) == T.
+   
+ typeOfPat(s, exp@ExpTyped(x, t)) = T :- 
+   variableType(s, x) == T.
+ */
+ 
+
+ 

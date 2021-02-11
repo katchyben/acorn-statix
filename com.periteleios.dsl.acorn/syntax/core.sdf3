@@ -1,0 +1,66 @@
+module core
+
+imports base
+
+context-free sorts 
+  EnumValue 
+  FunctionSortParams 
+  FunctionSortParam 
+  FormalArg 
+  OptFormalArgs 
+  OptCallArgs 
+  FunctionSortReturn
+
+context-free syntax %% Types
+  Sort.SimpleSort = <<SimpleSortLex>>
+  Sort.GenericSort = <<GenericSortLex> \< <{Sort ","}+> \>>
+  Sort.ListSort = <[ <Sort> ]>
+  Sort.SetSort = <{ <Sort> }>
+  Sort.RefSort = <ref <Sort>>
+  Sort.FunctionSort = <function <FunctionSortParams> <FunctionSortReturn>>
+
+lexical syntax
+
+  SimpleSortLex = "function" {reject}
+
+context-free syntax
+
+  %% function type; optionally specify (named) args and return type
+  FunctionSortParams.FunctionSortParams = <( <{FunctionSortParam ","}*> )>
+  FunctionSortParams.FunctionSortParamsNone = <>
+  FunctionSortParam.UnnamedArg = Sort
+  FunctionSortParam.NamedArg = <<VarId> : <Sort>>
+  FunctionSortReturn.FunctionSortReturn = <: <Sort>>
+  FunctionSortReturn.FunctionSortReturnNone = <>
+
+  FormalArg.Arg = <<VarId> : <Sort>>
+  OptFormalArgs.FormalArgs = <( <{FormalArg ","}*> )>
+  OptFormalArgs.OptFormalArgsNone = <>
+
+  OptCallArgs.CallArgs = <( <{Exp ","}*> )>
+  OptCallArgs.OptCallArgsNone = <>
+ 
+ 
+context-free syntax
+
+  Decl.Module = [module [ModuleName]
+    [{Definition "\n"}*]
+  ]
+
+  Definition.Import = [
+    import [ModuleName]
+  ]
+  
+  Definition.Enum = [
+    enum [Id] {
+      [{EnumValue ","}*]
+    }
+  ]
+  
+  EnumValue.EnumValue = [[Id] ( [String] )]
+      
+  
+template options
+  Id = keyword {reject}
+  keyword -/- [a-zA-Z0-9]
+

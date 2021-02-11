@@ -1,0 +1,23 @@
+module type
+
+imports base
+
+  
+context-free sorts ConstValue 
+
+context-free syntax
+  
+  Exp.Null = [null]
+  Exp.Const = ConstValue
+  ConstValue.Int = Int
+  ConstValue.Long = Long
+  ConstValue.Float = Float
+  ConstValue.StringConst = String
+  
+lexical syntax
+
+  VarId = "true" {reject}
+  VarId = "false" {reject}
+  VarId = "null" {reject}
+  
+  

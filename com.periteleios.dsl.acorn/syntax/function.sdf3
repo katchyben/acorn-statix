@@ -1,0 +1,56 @@
+module function
+
+imports base
+imports core
+
+context-free sorts 
+  ThisCall
+  OptSort 
+  Block 
+  Function
+
+context-free syntax
+
+  Function.Function = [ function [FunId] [OptFormalArgs] [OptSort] [Block] ]
+  
+  OptSort.OptSortNone = []
+  
+  OptSort.OptSortSome = [: [Sort]]
+  
+  Definition.GlobalFunction = [ [Function] ]
+  
+  Exp.FunctionExp = [function [OptFormalArgs] [OptSort] [Block]]
+  
+  Exp.FunctionRef = [function . [FunId] ( [{Sort ","}*] ) [OptSort]]
+  
+  Exp.FunctionRefCall = [function . [FunId] ( [{Sort ","}*] ) [OptSort] ( [{Exp ","}*] )]
+  
+  Exp.FunctionRefCallPartial = [function . [FunId] ( [{Sort ","}*] ) [OptSort] ( * , [{Exp ","}*] )]
+  
+  Block.Block = [{
+    [Exp*]
+  }]
+  
+context-free syntax // function
+
+  Exp = ThisCall
+  
+  ThisCall.ThisCall = [[FunId] ( [{Exp ","}*] )]
+  
+  Exp.Call = [[Exp].[Id] ( [{Exp ","}*] )]
+    
+  SimpleExp.SimpleThisCall = ThisCall
+  
+  SimpleExp.SimpleCall = [[SimpleExp] . [Id] ( [{Exp ","}*] )]
+
+  
+lexical syntax
+
+ VarId = "function" {reject}
+ 
+  
+  
+template options
+  Id = keyword {reject} 
+  keyword -/- [a-zA-Z0-9] 
+ 

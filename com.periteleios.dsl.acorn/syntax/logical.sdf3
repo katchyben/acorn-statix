@@ -1,0 +1,14 @@
+module logical
+
+imports base
+
+context-free syntax // logical
+  Exp.Or = [[Exp] or [Exp]] {left}
+  Exp.Not = [not [Exp]] {right}
+  Exp.In  = [[Exp] in [Exp]] {left}
+  Exp.NotIn  = [[Exp] not in [Exp]] {left} 
+  Exp.And = [[Exp] and [Exp]] {left}
+    
+template options
+  Id = keyword {reject} 
+  keyword -/- [a-zA-Z0-9] 

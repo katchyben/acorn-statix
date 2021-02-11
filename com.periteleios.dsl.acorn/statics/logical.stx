@@ -1,0 +1,50 @@
+module statics/logical
+
+imports statics/base
+imports statics/type
+
+imports signatures/logical-sig
+
+
+
+rules
+
+ // (e1 and e2)
+  typeOfExp(s, exp@And(e1, e2)) = BOOL() :- {T1 T2}
+    typeOfExp(s, e1) == T1, T1 == BOOL() | error $[Wrong operand types for operator And: [e1] has type [T1]],
+    typeOfExp(s, e2) == T2, T2 == BOOL() | error $[Wrong operand types for operator And: [e2] has type [T2]],
+    @exp.type := BOOL().
+
+  // (e1 or e2)
+  typeOfExp(s, exp@Or(e1, e2)) = BOOL() :- {T1 T2}
+    typeOfExp(s, e1) == T1, T1 == BOOL() | error $[Wrong operand types for operator Or: [e1] has type [T1]],
+    typeOfExp(s, e2) == T2, T2 == BOOL() | error $[Wrong operand types for operator Or: [e2] has type [T2]],
+    @exp.type := BOOL().
+    
+    
+  // (not e)
+  typeOfExp(s, exp@Not(e)) = BOOL() :- {T}
+    typeOfExp(s, e) == T,
+    T == BOOL() | error $[Wrong operand type for operator Not: [e] has type [T]],
+    @exp.type := BOOL().
+    
+  
+  // (e1 in e2)  
+  typeOfExp(s, exp@In(e1, e2)) = BOOL() :- {T}
+   typeOfExp(s, e1) == T,
+   typeOfExp(s, e2) == LIST(T),
+   @exp.type := BOOL().
+   
+   
+  
+  // (e1 not in e2)
+  typeOfExp(s, exp@NotIn(e1, e2)) = BOOL() :- {T}
+   typeOfExp(s, e1) == T,
+   typeOfExp(s, e2) == LIST(T),
+   @exp.type := BOOL().
+   
+    
+    
+ 
+ 
+ 

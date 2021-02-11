@@ -1,0 +1,109 @@
+module statics/entity
+
+imports statics/base
+imports statics/type
+
+imports signatures/core-sig
+imports signatures/entity-sig
+
+rules // entity declaration
+
+  // entity x : super { ... }
+  defOk(s_global, exp@Entity(x, super, bodydecs, key)) :- {s_entity s_super entity_scopes}
+    typeOfDecl of Entity{super} in s_global |-> [(_, (_, ENTITY(s_super)))] | error $[Entity [super] is not defined] @super,
+    new s_entity, s_entity -INHERIT-> s_super,
+    noCircularInheritance(s_entity) | error $[Circular inhertitance detected] @exp,
+    keyOk(s_entity, s_global, key),
+    declEntity(s_global, s_entity, x, bodydecs).
+
+  // entity x { ... }
+  defOk(s_global, exp@EntityNoSuper(x, bodydecs, key)) :- {s_entity entity_scopes}
+    new s_entity, s_entity -IMPORT-> s_global,
+    keyOk(s_entity, s_global, key),
+    declEntity(s_global, s_entity, x, bodydecs).
+  
+    
+  declEntity : scope * scope * string * list(AttributeDeclaration)
+  declEntity(s_global, s_entity, entity_name, bodydecs) :- {entity_scopes}
+    validEntityName(s_entity, entity_name),
+    s_global -> Entity{entity_name} with typeOfDecl ENTITY(s_entity),
+    typeOfDecl of Entity{entity_name} in s_global |-> [(_, (_, ENTITY(s_entity)))] | error $[Entity [entity_name] is defined multiple times] @entity_name,
+    declEntityAttribute(s_entity, bodydecs).
+    
+  validEntityName : scope * string
+  validEntityName(s, x) :-
+    equalB(isSimpleType(typeOfSort(s, SimpleSort(x))), FALSE()) | error $[Entity name [x] is not allowed] @x,
+    x != "Entity" | error $[Entity name [x] is not allowed] @x.
+  
+  
+  noCircularInheritance : scope
+  noCircularInheritance(s_ent) :- {res}
+    query () filter INHERIT+ and { s :- s == s_ent }
+             min $ < INHERIT
+             in s_ent |-> res,
+    res == [].
+    
+    
+ rules // entity body declaration
+
+  declAttributeDeclaration : scope * AttributeDeclaration
+  declAttributeDeclaration(_, _) :- false | error $[This entity body declaration is not yet implemented].
+  declEntityAttribute maps declAttributeDeclaration(*, list(*))
+
+   // attribute
+  declAttributeDeclaration(s, Attribute(x, sort)) :- {sortType}
+    sortType == typeOfSort(s, sort),
+    inequalType(sortType, UNTYPED()) | error $[Cannot resolve type [sort]] @sort,
+    declAttribute(s, x, sortType).
+
+  // derived attribute
+  declAttributeDeclaration(s, DerivedAttribute(x, sort, exp)) :- {sortType}
+    sortType == typeOfSort(s, sort),
+    equalType(sortType, typeOfExp(s, exp)) | error $[Expression [exp] must be of type [sort]] @exp,
+    declAttribute(s, x, sortType).
+    
+  declAttributes maps declAttribute(*, list(*), list(*))
+  declAttribute : scope * string * TYPE
+  declAttribute(s, x, sortType) :-
+    validAttributeName(x),
+    declVar(s, x, sortType),
+    noDuplicateVarDefsInSuper(s, x) | error $[Cannot override existing entity property [x]] @x.
+    
+    
+  validAttributeName : string
+  validAttributeName(x) :-
+    x != "id"       | error $[Cannot override the builtin property [x]] @x,
+    x != "version"  | error $[Cannot override the builtin property [x]] @x,
+    x != "created"  | error $[Cannot override the builtin property [x]] @x,
+    x != "modified" | error $[Cannot override the builtin property [x]] @x,
+    x != "class"    | error $[Cannot use the reserved property name [x]] @x.
+    
+  
+  keyOk : scope * scope * Identification
+  keyOk(s_bnd, s_ctx, Identification(x)) :- {T}
+   attributeReference(s_bnd, x) == T | error $[Key be must a defined attribute].
+  
+    
+rules // resolve reference types
+
+  attributeReference : scope * string -> TYPE
+  attributeReference(s, x) = t :- {x'}
+    typeOfDecl of Variable{x} in s |-> [(_, (Variable{x'}, t))|_] | error $[Attribute [x] is not defined],
+    @x.ref := x'.
+
+rules // subtyping
+
+  typeCompatibleB(ENTITY(s_sub), ENTITY(s_super)) = inherits(s_sub, s_super).
+  
+  
+  inheritEdgesAmount : scope * scope -> int
+  inheritEdgesAmount(s_sub, s_super) = pathLength(p) :-
+    query () filter INHERIT* and { s :- s == s_super }
+             min $ < INHERIT
+             in s_sub |-> [(p, _)].
+  
+  
+   
+  
+
+    

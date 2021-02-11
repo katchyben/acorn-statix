@@ -1,0 +1,9 @@
+---
+id: com.periteleios.dsl:com.periteleios.dsl.acorn.test:0.1.0-SNAPSHOT
+name: acorn
+dependencies:
+  compile:
+  - com.periteleios.dsl:com.periteleios.dsl.acorn:0.1.0-SNAPSHOT
+  - org.metaborg:org.metaborg.meta.lang.spt:${metaborgVersion}
+build:
+  useBuildSystemSpec: true

@@ -1,0 +1,42 @@
+module entity
+
+imports base
+
+context-free sorts
+
+  AttributeDeclaration Identification
+
+context-free syntax
+
+  Definition.Entity = [
+    entity [Id] extends [Id] 
+      attributes
+       [{AttributeDeclaration "\n"}*]
+      identification
+       key([Identification])
+    end entity
+  ]
+  
+  Definition.EntityNoSuper = [
+    entity [Id] 
+      attributes
+       [{AttributeDeclaration "\n"}*]
+      identification
+         key([Identification])
+    end entity
+  ]
+  
+ 
+context-free syntax
+
+  Identification.Identification = [[VarId]]
+  
+  AttributeDeclaration.Attribute = [
+    [VarId] : [Sort] 
+  ]
+  
+  AttributeDeclaration.DerivedAttribute = [
+    [VarId] : [Sort] = [Exp]
+  ]
+
+  

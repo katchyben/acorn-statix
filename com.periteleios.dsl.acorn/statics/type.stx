@@ -1,0 +1,138 @@
+module statics/type
+
+imports statics/base
+imports statics/type
+
+imports signatures/core-sig
+imports signatures/type-sig
+
+
+
+signature
+
+  constructors // semantic types
+    FUNCTION : list(TYPE) * TYPE  -> TYPE // list of arguments and return type
+    ENTITY   : scope -> TYPE
+    MOD      : scope -> TYPE
+
+    LIST : TYPE -> TYPE
+    SET  : TYPE -> TYPE
+    REF  : TYPE -> TYPE
+
+    // numeric types
+    INT           : TYPE
+    FLOAT         : TYPE
+    DECIMAL       : TYPE
+    LONG          : TYPE
+    TIMEINTERVAL  : TYPE
+
+    // string types
+    STRING      : TYPE
+  
+    // time types
+    DATE      : TYPE
+    DATETIME  : TYPE
+    TIME      : TYPE
+
+    // other
+    BOOL : TYPE
+    VOID : TYPE
+    UUID : TYPE
+
+    NULL : TYPE
+    ABSTRACTENTITY  : TYPE
+    
+
+
+rules // types of constant expressions
+ typeOfExp(_, exp@Null()) = NULL() :-
+    @exp.type := NULL().
+
+  typeOfExp(_, Const(exp@Int(_))) = INT() :-
+    @exp.type := INT().
+
+  typeOfExp(_, Const(exp@Long(_))) = LONG() :-
+    @exp.type := LONG().
+
+  typeOfExp(_, Const(exp@Float(_))) = FLOAT() :-
+    @exp.type := FLOAT().
+
+  typeOfExp(_, Const(exp@StringConst(_))) = STRING() :-
+    @exp.type := STRING().
+    
+    
+rules // map sorts to semantic types
+  typesOfSorts maps typeOfSort(*, list(*)) = list(*)
+  typeOfSort : scope * Sort -> TYPE
+  
+  typeOfSort(_, _) = UNTYPED(). // untyped by default
+  typeOfSort(_, SimpleSort("Integer")) = INT().
+  typeOfSort(_, SimpleSort("Float")) = FLOAT().
+  typeOfSort(_, SimpleSort("Long")) = LONG().
+  typeOfSort(_, SimpleSort("TimeInterval")) = TIMEINTERVAL().
+  typeOfSort(_, SimpleSort("String")) = STRING().
+  typeOfSort(_, SimpleSort("Date")) = DATE().
+  typeOfSort(_, SimpleSort("DateTime")) = DATETIME().
+  typeOfSort(_, SimpleSort("Time")) = TIME().
+  typeOfSort(_, SimpleSort("Boolean")) = BOOL().
+  typeOfSort(_, SimpleSort("UUID")) = UUID().
+  typeOfSort(_, SimpleSort("Entity")) = ABSTRACTENTITY().
+
+  // in case it's not a built in simple sort, it must be an entity
+  typeOfSort(s, SimpleSort(x)) = entityType(s, x).
+  typeOfSort(s, GenericSort("List", [innerSort])) = LIST(typeOfSort(s, innerSort)).
+  typeOfSort(s, GenericSort(_, _)) = UNTYPED() :- false | error $[Only lists and sets with one type parameter are supported].
+  typeOfSort(s, GenericSort("Set", [innerSort])) = SET(typeOfSort(s, innerSort)).
+  typeOfSort(s, RefSort(innerSort)) = REF(typeOfSort(s, innerSort)).
+
+rules // WebDSL definition of being a simple type: built-in simple sort (no generics, no ref, no entity etc)
+
+  isSimpleType: TYPE -> BOOL
+  isSimpleType(_) = FALSE(). // not a simple type by default
+
+  isSimpleType(INT()) = TRUE().
+  isSimpleType(FLOAT()) = TRUE().
+  isSimpleType(LONG()) = TRUE().
+
+  isSimpleType(STRING()) = TRUE().
+
+  isSimpleType(DATE()) = TRUE().
+  isSimpleType(DATETIME()) = TRUE().
+  isSimpleType(TIME()) = TRUE().
+
+  isSimpleType(BOOL()) = TRUE().
+  isSimpleType(VOID()) = TRUE().
+  isSimpleType(UUID()) = TRUE().
+
+  isSimpleType(NULL()) = TRUE().
+
+rules // resolve reference types
+
+  entityType : scope * string -> TYPE
+  entityType(s, e) = entity_type :- {e'}
+    typeOfDecl of Entity{e} in s |-> [(_, (Entity{e'}, entity_type))|_] | error $[Entity [e] is not defined],
+    @e.ref := e'.
+
+  variableType : scope * string -> TYPE
+  variableType(s, x) = t :- {x'}
+    typeOfDecl of Variable{x} in s |-> [(_, (Variable{x'}, t))|_] | error $[Variable [x] is not defined],
+    @x.ref := x'.
+
+  propertyTypes maps propertyType(*, list(*)) = list(*)
+  propertyType : scope * string -> TYPE
+  propertyType(s_entity, x) = t :- {x'}
+    query typeOfDecl filter EXTEND? (INHERIT EXTEND?)* and { Variable{v} :- v == x } min in s_entity |-> [(_, (Variable{x'}, t))] 
+        | error $[Attribute [x] is not defined] @x,
+    @x.ref := x'.
+
+   
+
+rules // utils
+
+  inequalType : TYPE * TYPE
+  inequalType(T, T) :- false.
+  inequalType(_, _).
+
+  equalType : TYPE * TYPE
+  equalType(T, T).
+  equalType(_, _) :- false.

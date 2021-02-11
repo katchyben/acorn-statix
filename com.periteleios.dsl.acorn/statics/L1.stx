@@ -1,0 +1,15 @@
+module statics/L1
+
+imports statics/base
+
+imports statics/arithmetic
+imports statics/relational
+imports statics/logical
+imports statics/conditional
+imports statics/pattern
+imports statics/variable
+imports statics/entity
+imports statics/function
+imports statics/type
+
+imports statics/file

@@ -1,0 +1,18 @@
+module arithmetic
+
+imports base
+
+context-free syntax
+  Exp.Min   = [-[Exp]]
+  Exp.Add   = [[Exp] + [Exp]] {left}
+  Exp.Sub   = [[Exp] - [Exp]] {left}
+  Exp.Mul   = [[Exp] * [Exp]] {left}
+  Exp.Div = [[Exp] / [Exp]] {left}
+  Exp.Mod = [[Exp] % [Exp]] {left}  
+  
+context-free priorities
+  Exp.Min > Exp.Mul > {left: Exp.Add Exp.Sub}
+    
+template options
+  ID = keyword {reject} 
+  keyword -/- [a-zA-Z0-9] 

@@ -1,0 +1,21 @@
+module relational
+
+imports base
+  
+  
+context-free syntax // relational
+  Exp.True  = [true]
+  Exp.False = [false]  
+  
+  Exp.Gt = [[Exp] > [Exp]] {non-assoc}
+  Exp.Lt = [[Exp] < [Exp]] {non-assoc}
+  Exp.Gte = [[Exp] >= [Exp]] {non-assoc}
+  Exp.Lte = [[Exp] <= [Exp]] {non-assoc}
+  Exp.Eq = [[Exp] == [Exp]] {non-assoc}
+  Exp.Neq = [[Exp] <> [Exp]] {non-assoc}
+    
+  
+template options
+  Id = keyword {reject}
+  keyword -/- [a-zA-Z0-9]
+  

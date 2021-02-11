@@ -1,0 +1,92 @@
+module statics/variable
+
+imports statics/base
+imports statics/type
+
+imports signatures/variable-sig
+
+
+
+signature
+  constructors
+    LIST1 : TYPE -> TYPE
+
+rules // variables
+
+  typeOfExp(s, exp@Var(x)) = t :-
+    variableType(s, x) == t,
+    @exp.type := t.
+  
+  typeOfSimpleExp(s, exp@SimpleVar(x)) = t :-
+    variableType(s, x) == t,
+    @exp.type := t.
+
+  typeOfExp(s, FieldAccess(exp@FAVar(var), x)) = propertyType :- {s_entity varType}
+    variableType(s, var) == varType,
+    @exp.type := varType,
+    varType == ENTITY(s_entity) | error $[Cannot resolve [exp] to an entity] @exp,
+    propertyType(s_entity, x) == propertyType,
+    @x.type := propertyType.
+
+  typeOfExp(s, FieldAccess(FAExp(exp), x)) = propertyType :- {s_entity}
+    typeOfExp(s, exp) == ENTITY(s_entity) | error $[Cannot resolve [exp] to an entity] @exp,
+    propertyType(s_entity, x) == propertyType,
+    @x.type := propertyType.
+    
+   typeOfSimpleExp(s, SimpleFieldAccess(exp, x)) = propertyType :- {s_entity}
+    typeOfSimpleExp(s, exp) == ENTITY(s_entity) | error $[Cannot resolve [exp] to an entity] @exp,
+    propertyType(s_entity, x) == propertyType,
+    @x.type := propertyType.
+    
+ rules //Binding 
+ 
+  varDeclOk : scope * scope * Exp  
+  varDeclInitOk : scope * scope * Exp 
+  varDeclInferredOk : scope * scope * Exp 
+  
+  varDeclOk(s, s_decl, VarDecl(x, sort)) :- {t}
+    t == typeOfSort(s, sort),
+    inequalType(t, UNTYPED()) | error $[Unknown type [sort]] @sort,
+    declVar(s_decl, x, t).
+
+  varDeclInitOk(s, s_decl, VarDeclInit(x, sort, exp)) :- {t}
+    t == typeOfSort(s, sort),
+    equalType(t, typeOfExp(s, exp)) | error $[Expression [exp] is not of type [sort]] @exp,
+    declVar(s_decl, x, t).
+
+  varDeclInferredOk(s, s_decl, VarDeclInitInferred(x, exp)) :- {t}
+    t == typeOfExp(s, exp),
+    inequalType(t, UNTYPED()) | error $[Unable to infer type of [exp]] @exp,
+    declVar(s_decl, x, t).
+      
+    
+rules // list and set creation
+
+  typeOfExp(s, ListCreation([])) = UNTYPED() :- false | error $[Type cannot be determined for empty untyped list creation].
+  typeOfExp(s, lc@ListCreation([hd | tl])) = LIST(t) :-
+    t == typeOfExp(s, hd), // first element of the untyped list creation determines the type
+    typesCompatibleWith(t, typesOfExps(s, tl)) | error $[Not all elements are compatible with type [t]] @tl,
+    @lc.type := LIST(t).
+
+  typeOfExp(s, tlc@TypedListCreation(sort, exps)) = LIST(t) :-
+    typeOfSort(s, sort) == t,
+    typesCompatibleWith(t, typesOfExps(s, exps)) | error $[Not all elements are compatible with type [t]] @exps,
+    @tlc.type := LIST(t).
+
+  typeOfExp(s, SetCreation([])) = UNTYPED() :- false | error $[Type cannot be determined for empty untyped set creation].
+  typeOfExp(s, sc@SetCreation([hd | tl])) = SET(t) :-
+    t == typeOfExp(s, hd), // first element of the untyped set creation determines the type
+    typesCompatibleWith(t, typesOfExps(s, tl)) | error $[Not all elements are compatible with type [t]] @tl,
+    @sc.type := SET(t).
+
+  typeOfExp(s, tsc@TypedSetCreation(sort, exps)) = SET(t) :-
+    typeOfSort(s, sort) == t,
+    typesCompatibleWith(t, typesOfExps(s, exps)) | error $[Not all elements are compatible with type [t]] @exps,
+    @tsc.type := SET(t).
+        
+rules // Cast
+   typeOfExp(s, exp@Cast(e, t)) = T1 :- {T2}
+    typeOfSort(s, t) == T2,
+    subtype(T2, T1) | error $[type of expression [T2] does not match expected type [T1]].
+
+  
