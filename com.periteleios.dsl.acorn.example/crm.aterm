@@ -1,0 +1,7 @@
+Entity(
+  "Party"
+, NoExtends()
+, NoMixins()
+, [Attribute("name", SimpleSort("String"))]
+, Identification("name")
+)

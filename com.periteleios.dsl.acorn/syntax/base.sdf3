@@ -3,9 +3,10 @@ module base
 imports lex
 
 lexical sorts  
-  Int
-  Float 
-  Long
+  INT
+  FLOAT 
+  LONG
+  STRING
   SimpleSortLex 
   GenericSortLex 
   VarId 
@@ -20,7 +21,6 @@ context-free sorts
  Decl 
  Bind 
  Ref 
- String 
  Definition 
  SimpleSort 
  SimpleExp 

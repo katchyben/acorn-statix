@@ -6,60 +6,38 @@ imports statics/type
 
 imports signatures/pattern-sig
 
- 
-  
 rules // patterns
-  
+ 
   typeOfExp(s, exp@Match(e, cases)) = T :- {S}
     typeOfExp(s, e) == S,
-    typeOfCases(s, S, cases) == [T | _].
+    typeOfCases(s, S, cases) == [T | _],
+    @exp.type := T.
   
   typeOfCase : scope * TYPE * Case -> TYPE
-  typeOfCases maps typeOfCase(*, *, list(*)) = list(*)
+  typeOfCases maps typeOfCase(*, *, list(*)) = list(*)  
   
-  typeOfCase(s, S, exp@Case(p, e)) = T :- {s_case}
+  typeOfCase(s, S, Case(p, e)) = T :- {s_case}
     new s_case, s_case -P-> s, 
-    typeOfPat(s_case, p) == S,
-    typeOfExp(s_case, e) == T.
+    typeOfPat(s_case, p) == S | error $[Types [S] and [T] are not comparable],
+    typeOfExp(s_case, e) == T | error $[Types [S] and [T] are not comparable].
+    
+  typeOfCase(s, S, DefaultCase(e)) = T :- {s_case}
+    new s_case, s_case -P-> s, 
+    typeOfExp(s_case, e) == S,
+     equitype(T, S)
+    | error $[Types [S] and [T] are not comparable].
   
   typeOfPat : scope * Pat -> TYPE
-  
-  typeOfPat(s, exp@PatVar(x)) = T :-
-    variableType(s, x) == T.
+  typeOfPat(s, PVar(x)) = T :-
+    variableType(s, x) == T.  
     
-  typeOfPat(s, exp@ExpParens(e)) = T :- 
-   typeOfExp(s, e) == T.
-   
-  typeOfPat(s, exp@ExpTyped(x, t)) = T :- 
-   variableType(s, x) == T.
-    
+  typeOfPat(s, PLit(_)) = T.
+            
   typeOfPat(s, exp@PatApp(p1, p2)) = T.
- 
- /*typeOfExp(s, exp@Match(e, cases)) = T :- {S}
-   typeOfExp(s, e) == S,
-   typeOfCases(s, S, cases) == [T | _].
- 
- typeOfCase : scope * TYPE * Case -> TYPE
- typeOfCases maps typeOfCase(*, *, list(*)) = list(*)
- 
- typeOfCase(s, S, exp@Case(p, e)) = T :- {s_case}
-   new s_case, s_case -P-> s, 
-   typeOfPat(s_case, p) == S,
-   typeOfExp(s_case, e) == T.
- 
- typeOfPat : scope * Pat -> TYPE
- 
- typeOfPat(s, exp@PatVar(x)) = T :-
-   variableType(s, x) == T.
   
- typeOfPat(s, exp@PatApp(p1, p2)) = T.  
+  // typeOfPat(s, PatConstr(x)) = T.
+  
  
- typeOfPat(s, exp@ExpParens(e)) = T :- 
-   typeOfExp(s, e) == T.
-   
- typeOfPat(s, exp@ExpTyped(x, t)) = T :- 
-   variableType(s, x) == T.
- */
  
 
  

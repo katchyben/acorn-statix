@@ -2,32 +2,26 @@ module statics/entity
 
 imports statics/base
 imports statics/type
+imports statics/attribute
 
 imports signatures/core-sig
 imports signatures/entity-sig
 
 rules // entity declaration
 
-  // entity x : super { ... }
-  defOk(s_global, exp@Entity(x, super, bodydecs, key)) :- {s_entity s_super entity_scopes}
-    typeOfDecl of Entity{super} in s_global |-> [(_, (_, ENTITY(s_super)))] | error $[Entity [super] is not defined] @super,
-    new s_entity, s_entity -INHERIT-> s_super,
-    noCircularInheritance(s_entity) | error $[Circular inhertitance detected] @exp,
-    keyOk(s_entity, s_global, key),
-    declEntity(s_global, s_entity, x, bodydecs).
-
-  // entity x { ... }
-  defOk(s_global, exp@EntityNoSuper(x, bodydecs, key)) :- {s_entity entity_scopes}
-    new s_entity, s_entity -IMPORT-> s_global,
-    keyOk(s_entity, s_global, key),
-    declEntity(s_global, s_entity, x, bodydecs).
-  
+  // entity x : super 
+  defOk(s, exp@Entity(x, super, mixins, bodydecs, key)) :- {s_entity s_super entity_scopes}
+    new s_entity, s_entity -IMPORT-> s,
+    extendsOk(s, s_entity, super),
+    mixinsOk(s, s_entity, mixins),
+    keyOk(s_entity, s, key),
+    declEntity(s, s_entity, x, bodydecs).
     
   declEntity : scope * scope * string * list(AttributeDeclaration)
-  declEntity(s_global, s_entity, entity_name, bodydecs) :- {entity_scopes}
+  declEntity(s, s_entity, entity_name, bodydecs) :- {entity_scopes}
     validEntityName(s_entity, entity_name),
-    s_global -> Entity{entity_name} with typeOfDecl ENTITY(s_entity),
-    typeOfDecl of Entity{entity_name} in s_global |-> [(_, (_, ENTITY(s_entity)))] | error $[Entity [entity_name] is defined multiple times] @entity_name,
+    s -> Type{entity_name} with typeOfDecl ENTITY(s_entity),
+    typeOfDecl of Type{entity_name} in s |-> [(_, (_, ENTITY(s_entity)))] | error $[Entity [entity_name] is defined multiple times] @entity_name,
     declEntityAttribute(s_entity, bodydecs).
     
   validEntityName : scope * string
@@ -43,46 +37,23 @@ rules // entity declaration
              in s_ent |-> res,
     res == [].
     
-    
- rules // entity body declaration
-
-  declAttributeDeclaration : scope * AttributeDeclaration
-  declAttributeDeclaration(_, _) :- false | error $[This entity body declaration is not yet implemented].
-  declEntityAttribute maps declAttributeDeclaration(*, list(*))
-
-   // attribute
-  declAttributeDeclaration(s, Attribute(x, sort)) :- {sortType}
-    sortType == typeOfSort(s, sort),
-    inequalType(sortType, UNTYPED()) | error $[Cannot resolve type [sort]] @sort,
-    declAttribute(s, x, sortType).
-
-  // derived attribute
-  declAttributeDeclaration(s, DerivedAttribute(x, sort, exp)) :- {sortType}
-    sortType == typeOfSort(s, sort),
-    equalType(sortType, typeOfExp(s, exp)) | error $[Expression [exp] must be of type [sort]] @exp,
-    declAttribute(s, x, sortType).
-    
-  declAttributes maps declAttribute(*, list(*), list(*))
-  declAttribute : scope * string * TYPE
-  declAttribute(s, x, sortType) :-
-    validAttributeName(x),
-    declVar(s, x, sortType),
-    noDuplicateVarDefsInSuper(s, x) | error $[Cannot override existing entity property [x]] @x.
-    
-    
-  validAttributeName : string
-  validAttributeName(x) :-
-    x != "id"       | error $[Cannot override the builtin property [x]] @x,
-    x != "version"  | error $[Cannot override the builtin property [x]] @x,
-    x != "created"  | error $[Cannot override the builtin property [x]] @x,
-    x != "modified" | error $[Cannot override the builtin property [x]] @x,
-    x != "class"    | error $[Cannot use the reserved property name [x]] @x.
-    
-  
+     
   keyOk : scope * scope * Identification
   keyOk(s_bnd, s_ctx, Identification(x)) :- {T}
    attributeReference(s_bnd, x) == T | error $[Key be must a defined attribute].
+   
+  extendsOk : scope * scope * Extends 
+  extendsOk(_, _, NoExtends()).
+  extendsOk(s, s_entity, exp@Extends(parent)) :- {s_super}
+     noCircularInheritance(s_entity) | error $[Circular inhertitance detected],
+     typeOfDecl of Type{parent} in s |-> [(_, (_, ENTITY(s_super)))],
+     s_entity -INHERIT-> s_super.
   
+ mixinsOk : scope * scope * Mixins
+ mixinsOk(_, _, NoMixins()).
+ mixinsOk(s, s_entity, Mixins(x)) :- {s_pc}
+    typeOfDecl of Type{x} in s |-> [(_, (_, TRAIT(s_pc)))] | error $[Trait [x] is not defined],
+    s_entity -EXTEND-> s_pc.
     
 rules // resolve reference types
 
@@ -94,7 +65,6 @@ rules // resolve reference types
 rules // subtyping
 
   typeCompatibleB(ENTITY(s_sub), ENTITY(s_super)) = inherits(s_sub, s_super).
-  
   
   inheritEdgesAmount : scope * scope -> int
   inheritEdgesAmount(s_sub, s_super) = pathLength(p) :-

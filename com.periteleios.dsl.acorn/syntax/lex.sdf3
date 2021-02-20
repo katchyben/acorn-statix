@@ -19,43 +19,35 @@ lexical restrictions
 
 lexical syntax
 
-  Int = "-"? [0-9]+
-  Long = "-"? [0-9]+ "L"
-  Float = "-"? FloatDigits ExponentPart? [fFdD]?
+  INT = "-"? [0-9]+
+  LONG = "-"? [0-9]+ "L"
+  FLOAT = "-"? FloatDigits ExponentPart? [fFdD]?
   FloatDigits = [0-9]* "." [0-9]+
   FloatDigits = [0-9]+
   ExponentPart = [eE] SignedInteger
   SignedInteger = [\+\-]? [0-9]+
-  Float = "-"? [0-9]+ {reject}
+  FLOAT = "-"? [0-9]+ {reject}
   FloatDigits = "." {reject}
 
 lexical restrictions
 
-  Int -/- [0-9]
-  Int -/- [L]             // to avoid longs getting parsed as an integer followed by a template call
-  Int -/- [eEfFdD]        // to avoid floats getting parsed as an integer followed by a template call
-  Float -/- [fFdD]
+  INT -/- [0-9]
+  INT -/- [L]             // to avoid longs getting parsed as an integer followed by a template call
+  INT -/- [eEfFdD]        // to avoid floats getting parsed as an integer followed by a template call
+  FLOAT -/- [fFdD]
   FloatDigits -/- [0-9]
   SignedInteger -/- [0-9]
+  
+//lexical sorts STRING
+lexical syntax
+  STRING         = "\"" StringChar* "\"" 
+  StringChar     = ~[\"\n] 
+  StringChar     = "\\\"" 
+  StringChar     = BackSlashChar 
+  BackSlashChar  = "\\" 
+lexical restrictions
+  BackSlashChar -/- [\"] // Backslash chars in strings may not be followed by "
 
-context-free sorts
-
-   StringPart StringInterpExp
-
-%% Kernel syntax is required here since we do not want LAYOUT to be parsed between
-%% the first QMLex and StringLex
-syntax
-
-  String-CF.String = "\"" StringPart-CF* "\""
-
-  StringPart-CF.StringValue = StringLex-LEX
-  StringPart-CF.InterpValue = "~" StringInterpExp-CF
-
-  StringInterpExp-CF.InterpSimpleExp = SimpleExp-CF
-
-context-free restrictions
-
-  StringInterpExp -/- [\.\(]
 
 
 context-free syntax
@@ -69,22 +61,6 @@ context-free syntax
   SimpleExp.SimpleVar = Id
   SimpleExp.SimpleFieldAccess = <<SimpleExp> . <Id>>
 
-lexical sorts
-
-  QMLex StringLex StringChar HexPart
-
-lexical syntax
-
-  QMLex = "\""
-  StringLex = StringChar+
-  StringChar = ~[\"\n\~\\]
-  StringChar = "\\" [0-9btnfr\'\"\\\~]
-  HexPart = [0-9a-fA-F]
-  StringChar = "\\u" HexPart HexPart HexPart HexPart
-
-lexical restrictions
-
-  StringLex -/- ~[\"\n\~]
 
 
 lexical syntax

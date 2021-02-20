@@ -1,0 +1,23 @@
+module statics/trait
+
+imports statics/base
+imports statics/type
+imports statics/attribute
+
+imports signatures/trait-sig
+
+rules // trait declaration
+
+
+  // trait x 
+  defOk(s, exp@Trait(x, bodydecs)) :- {s_trait trait_scopes}
+    new s_trait, s_trait -EXTEND-> s,
+    declTrait(s, s_trait, x, bodydecs).
+  
+    
+  declTrait : scope * scope * string * list(AttributeDeclaration)
+  declTrait(s, s_trait, trait_name, bodydecs) :- {trait_scopes}
+    s -> Type{trait_name} with typeOfDecl TRAIT(s_trait),
+    typeOfDecl of Type{trait_name} in s |-> [(_, (_, TRAIT(s_trait)))] | error $[Trait [trait_name] is defined multiple times] @trait_name,
+    declEntityAttribute(s_trait, bodydecs).
+  

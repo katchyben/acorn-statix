@@ -1,0 +1,47 @@
+module statics/attribute
+
+imports statics/base
+imports statics/type
+
+imports signatures/attribute-sig
+
+
+rules
+  declAttributes maps declAttribute(*, list(*), list(*))
+  declAttribute : scope * string * TYPE
+  declAttribute(s, x, sortType) :-
+    validAttributeName(x),
+    declVar(s, x, sortType),
+    noDuplicateVarDefsInSuper(s, x) | error $[Cannot override existing entity property [x]] @x.
+  
+  
+  validAttributeName : string
+  validAttributeName(x) :-
+    x != "id"       | error $[Cannot override the builtin property [x]] @x,
+    x != "version"  | error $[Cannot override the builtin property [x]] @x,
+    x != "created"  | error $[Cannot override the builtin property [x]] @x,
+    x != "modified" | error $[Cannot override the builtin property [x]] @x,
+    x != "class"    | error $[Cannot use the reserved property name [x]] @x.
+    
+ rules // entity body declaration
+
+  declAttributeDeclaration : scope * AttributeDeclaration
+  declAttributeDeclaration(_, _) :- false | error $[This entity body declaration is not yet implemented].
+  declEntityAttribute maps declAttributeDeclaration(*, list(*))
+
+   // attribute
+  declAttributeDeclaration(s, Attribute(x, sort)) :- {sortType}
+    sortType == typeOfSort(s, sort),
+    inequalType(sortType, UNTYPED()) | error $[Cannot resolve type [sort]] @sort,
+    declAttribute(s, x, sortType).
+
+  // derived attribute
+  declAttributeDeclaration(s, DerivedAttribute(x, sort, exp)) :- {sortType d_scope}
+    new d_scope,
+    d_scope -P-> s,
+    sortType == typeOfSort(s, sort),
+    equalType(sortType, typeOfExp(s, exp)) | error $[Expression [exp] must be of type [sort]] @exp,
+    declAttribute(s, x, sortType).
+       
+ 
+ 

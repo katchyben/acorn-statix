@@ -11,6 +11,8 @@ signature
   
   constructors
     TopType : TYPE
+    FUNCTION : list(TYPE) * TYPE  -> TYPE // list of arguments and return type
+    
  
   constructors // semantic types
     UNTYPED : TYPE
@@ -20,12 +22,14 @@ signature
     FALSE : BOOL
 
   namespaces
-    Mod : String
+    Mod : string
     Entity : string
     Trait : string
     Function : string
     Variable : string
     Table : string
+    Enum : string
+    Type : string
     
   name-resolution
     labels
@@ -34,16 +38,30 @@ signature
       EXTEND  // extend edge label for extending entities
       INHERIT // inherit edge label for subclasses
       IMPORT  // import edge label for importing the global scope and other modules
-      ROOT
+      ROOT    // Root scope
+      IMPL    // Implements label
       
      resolve
       Mod
       filter P* 
       min $ < P, $ < IMPORT,  P < IMPORT 
+      
     resolve
       Entity
-      filter P* F* EXTEND? INHERIT* IMPORT*
-      min $ < P, $ < F, $ < EXTEND, $ < INHERIT, $ < IMPORT, P < F, P < EXTEND, P < INHERIT, P < IMPORT, F < EXTEND, F < INHERIT, F < IMPORT, EXTEND < INHERIT, EXTEND < IMPORT, INHERIT < IMPORT
+      filter P* F* EXTEND? INHERIT* IMPORT* 
+      min $ < P, $ < F, $ < EXTEND, $ < INHERIT, 
+          $ < IMPORT, P < F, P < EXTEND, P < INHERIT, P < IMPORT, 
+          F < EXTEND, F < INHERIT, F < IMPORT, EXTEND < INHERIT, 
+          EXTEND < IMPORT, INHERIT < IMPORT
+     
+    resolve
+      Type
+      filter P* F* EXTEND? INHERIT* IMPORT* 
+      min $ < P, $ < F, $ < EXTEND, $ < INHERIT, 
+          $ < IMPORT, P < F, P < EXTEND, P < INHERIT, P < IMPORT, 
+          F < EXTEND, F < INHERIT, F < IMPORT, EXTEND < INHERIT, 
+          EXTEND < IMPORT, INHERIT < IMPORT
+          
     resolve
       Trait
       filter P* F* EXTEND? INHERIT* IMPORT*
@@ -51,6 +69,7 @@ signature
     resolve
       Function
       filter P* F* EXTEND? (INHERIT EXTEND?)* IMPORT*
+      
     resolve
       Variable
       filter P* F* EXTEND? (INHERIT EXTEND?)* IMPORT*
@@ -61,11 +80,9 @@ signature
     typeOfFunDecl      : occurrence -> FUNSIG
     entity             : occurrence -> scope
     typeOf : -> TYPE 
+    function : (string * scope) -> TYPE
 
 rules // declare common rules and mappings
-
-  /*unitOk : scope * Start
-  unitOk(_, _) :- false | error $[This unit is not yet implemented].*/
   
   defOk : scope * Definition
   defOk(_,_) :- false | error $[This definition is not yet implemented].
@@ -139,6 +156,7 @@ rules // well-typedness of ..
   declOk : scope * Decl 
   declOk(_,_) :- false | error $[This definition is not yet implemented].
   declsOk maps declOk(*, list(*))
+   
 
 rules // operations on types
 
@@ -177,6 +195,22 @@ rules
   inheritsHelper : list((path * scope)) -> BOOL
   inheritsHelper(_) = FALSE().
   inheritsHelper([(_,_)]) = TRUE().
+  
+
+  
+rules // function declaration and resolving
+
+  declareFunction : scope * string * list(TYPE) * TYPE
+  declareFunction(s, f, args, return) :-
+    !function[(f, new), FUNCTION(args, return)] in s.
+
+  resolveFunction : scope * string -> list((path * (string * TYPE)))
+  resolveFunction(s, f) = dropUniqueIds(ps) :-
+    query function filter P* F* EXTEND? (INHERIT EXTEND?)* IMPORT*
+                   and { f' :- f' == (f, _) }
+                   min $ < P, $ < F, $ < EXTEND, $ < INHERIT, $ < IMPORT, P < F, P < EXTEND, P < INHERIT, P < IMPORT, F < EXTEND, F < INHERIT, F < IMPORT, EXTEND < INHERIT, EXTEND < IMPORT, INHERIT < IMPORT
+                   and { id, id' :- (_, id) == (_, id') }
+                   in s |-> ps.
   
 rules // utils
 
@@ -219,4 +253,9 @@ rules // utils
   pathLength(_PathStep(p, _, _)) = x :- {x'}
     x' == pathLength(p),
     x #= x' + 1.
+    
+  // functional rule to drop the unique id (implemented as scope) from query results
+  dropUniqueIds maps dropUniqueId(list(*)) = list(*)
+  dropUniqueId : (path * ((string * scope) * TYPE)) -> (path * (string * TYPE))
+  dropUniqueId((p, ((x, id), t))) = (p, (x, t)).
   

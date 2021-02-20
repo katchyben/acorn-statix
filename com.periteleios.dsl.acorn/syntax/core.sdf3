@@ -3,13 +3,13 @@ module core
 imports base
 
 context-free sorts 
-  EnumValue 
   FunctionSortParams 
   FunctionSortParam 
   FormalArg 
   OptFormalArgs 
   OptCallArgs 
   FunctionSortReturn
+  BuiltIn
 
 context-free syntax %% Types
   Sort.SimpleSort = <<SimpleSortLex>>
@@ -51,15 +51,8 @@ context-free syntax
     import [ModuleName]
   ]
   
-  Definition.Enum = [
-    enum [Id] {
-      [{EnumValue ","}*]
-    }
-  ]
-  
-  EnumValue.EnumValue = [[Id] ( [String] )]
-      
-  
+   
+   
 template options
   Id = keyword {reject}
   keyword -/- [a-zA-Z0-9]

@@ -11,7 +11,9 @@ context-free sorts
 
 context-free syntax
 
-  Function.Function = [ function [FunId] [OptFormalArgs] [OptSort] [Block] ]
+  //Exp.Fun = "function" "(" {ID ","}* ")" "{" Exp "}"
+  
+  Function.Function = [ func [FunId] [OptFormalArgs] [OptSort] [Block] ]
   
   OptSort.OptSortNone = []
   
@@ -19,13 +21,13 @@ context-free syntax
   
   Definition.GlobalFunction = [ [Function] ]
   
-  Exp.FunctionExp = [function [OptFormalArgs] [OptSort] [Block]]
+  Exp.FunctionExp = [func [OptFormalArgs] [OptSort] [Block]]
   
-  Exp.FunctionRef = [function . [FunId] ( [{Sort ","}*] ) [OptSort]]
+  Exp.FunctionRef = [func . [FunId] ( [{Sort ","}*] ) [OptSort]]
   
-  Exp.FunctionRefCall = [function . [FunId] ( [{Sort ","}*] ) [OptSort] ( [{Exp ","}*] )]
+  Exp.FunctionRefCall = [func . [FunId] ( [{Sort ","}*] ) [OptSort] ( [{Exp ","}*] )]
   
-  Exp.FunctionRefCallPartial = [function . [FunId] ( [{Sort ","}*] ) [OptSort] ( * , [{Exp ","}*] )]
+  Exp.FunctionRefCallPartial = [func . [FunId] ( [{Sort ","}*] ) [OptSort] ( * , [{Exp ","}*] )]
   
   Block.Block = [{
     [Exp*]
@@ -46,10 +48,9 @@ context-free syntax // function
   
 lexical syntax
 
- VarId = "function" {reject}
+ VarId = "func" {reject}
  
-  
-  
+ 
 template options
   Id = keyword {reject} 
   keyword -/- [a-zA-Z0-9] 

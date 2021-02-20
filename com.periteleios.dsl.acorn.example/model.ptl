@@ -1,0 +1,55 @@
+module model
+ 
+    import crm 
+    
+    entity Test 
+     attributes
+       name : Integer
+       employee : Employee
+     identification
+       key(name)
+    end entity
+    
+    entity Test2 
+      attributes
+        name : Integer
+        surname : Set<Integer> = {1, 2, 4}
+        test : Test
+        test3 : Integer = cast("4" as Integer) + cast(3 as Integer)
+        test4 : DateTime = now()
+        test5 : Date = today()
+        test6 : Date = Date("12-20-1990", "MM-dd-yyyy")
+        test7 : Date = to_date("12-20-1990")
+        test8 : Date = date_add("12-20-1990", 6 )
+      identification
+         key(name)
+    end entity
+    
+    
+    entity Test3 
+      attributes
+        test0 : Test
+        test1 : Integer = 5 + test2 + 2
+        test2 : Integer
+        test3 : Integer = if (4 > 7) test2 else test1
+        test4 : Test2
+        test5 : Integer = test4.test.name
+        test6 : String = test0.employee.party.name
+        test7 : Boolean = match (1 > 3) with
+                              case true -> true
+                              case false -> false
+                              case default -> true
+        test8 : Boolean
+        test9 : Integer = hour("5")
+        test10 : Integer = year("2020")
+      identification
+         key(test0)
+    end entity	
+    
+    
+    
+    
+    
+    
+    
+ 

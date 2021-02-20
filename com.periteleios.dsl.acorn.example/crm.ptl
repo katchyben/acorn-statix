@@ -1,0 +1,68 @@
+module crm
+
+    enum Gender 
+      Male ("Male"),
+      Female ("Female")
+    end enum
+    
+    trait GGts
+      attributes
+        timer : String
+    end trait
+    
+  entity Employee
+    attributes
+      name : String
+      surname : String
+      gender : Gender
+      isSame : Boolean = name like surname
+      party : Party
+      dob : Date = today()
+      tested : Boolean = 2 in [1, 2, 3]
+      height : Float = (1.0 > 2.0) ? 3.4 : 1.0
+      counting : Integer = cast("3" as Integer) + cast(5 as Integer)
+    identification
+      key(name)
+  end entity
+  
+  entity Party with GGts
+    attributes
+      name : String 
+    identification
+      key(name)
+  end entity
+  
+  entity Teacher extends Employee 
+    attributes 
+     name1 : String
+     surname2 : String
+     test : String 
+    identification
+     key(name)
+  end entity
+  
+  entity Person
+    attributes
+      name : String
+      surname : String
+      dob : Date
+      gender : Boolean
+      age : Integer = 2
+      height : Float = (1.0 > 2.0) ? 3.4 : 1.0
+      fullName : String = concat(name, surname)
+      tested : Boolean = 2 in [1, 2, 3]
+      counting : Integer = cast("3" as Integer) + cast(5 as Integer)
+      amount : String = match (1 > 2) with
+                           case true -> "true"
+                           case false -> match false with
+                                           case true -> "false"
+                                           case false -> match false with
+                                                            case true -> "false"
+                                                            case false -> "true"
+      employee : Employee
+    identification
+      key(name)
+  end entity
+  
+
+

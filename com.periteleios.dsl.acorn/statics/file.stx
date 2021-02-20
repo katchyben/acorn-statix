@@ -1,6 +1,8 @@
 module statics/file
 
 imports statics/base
+imports statics/built-ins
+
 imports signatures/file-sig
 
 rules

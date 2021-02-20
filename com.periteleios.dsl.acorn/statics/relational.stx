@@ -57,12 +57,27 @@ rules
       typeCompatibleB(T2, T1)
     ) == TRUE() | error $[Wrong operand types for operator NotEq: [e1] has type [T1],[e2] has type [T2]],
     @exp.type := BOOL().
-    
-  typeOfExp(_, exp@True()) = BOOL() :-
-    @exp.type := BOOL().
-
-  typeOfExp(_, exp@False()) = BOOL() :-
+         
+  // (e1 like e2)
+  typeOfExp(s, exp@Like(e1, e2)) = BOOL() :- {T1 T2}
+    typeOfExp(s, e1) == T1,
+    typeOfExp(s, e2) == T2,
+    orB(
+      typeCompatibleB(T1, T2),
+      typeCompatibleB(T2, T1)
+    ) == TRUE() | error $[Wrong operand types for operator like: [e1] has type [T1],[e2] has type [T2]],
     @exp.type := BOOL().
    
+   
+    // (e1 not like e2)
+  typeOfExp(s, exp@NotLike(e1, e2)) = BOOL() :- {T1 T2}
+    typeOfExp(s, e1) == T1,
+    typeOfExp(s, e2) == T2,
+    orB(
+      typeCompatibleB(T1, T2),
+      typeCompatibleB(T2, T1)
+    ) == TRUE() | error $[Wrong operand types for operator not like: [e1] has type [T1],[e2] has type [T2]],
+    @exp.type := BOOL().
+ 
     
     

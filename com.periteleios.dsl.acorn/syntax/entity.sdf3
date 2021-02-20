@@ -1,15 +1,16 @@
 module entity
 
 imports base
+imports attribute
 
 context-free sorts
 
-  AttributeDeclaration Identification
+  Identification Mixins Extends
 
 context-free syntax
 
   Definition.Entity = [
-    entity [Id] extends [Id] 
+    entity [Id] [Extends] [Mixins]
       attributes
        [{AttributeDeclaration "\n"}*]
       identification
@@ -17,26 +18,24 @@ context-free syntax
     end entity
   ]
   
-  Definition.EntityNoSuper = [
+  /*Definition.EntityNoSuper = [
     entity [Id] 
       attributes
        [{AttributeDeclaration "\n"}*]
       identification
          key([Identification])
     end entity
-  ]
+  ]*/
   
- 
+
 context-free syntax
+
+  Mixins.NoMixins = []
+  Mixins.Mixins = [with [Id]]
+  
+  Extends.NoExtends = []
+  Extends.Extends = [extends [Id]]
 
   Identification.Identification = [[VarId]]
   
-  AttributeDeclaration.Attribute = [
-    [VarId] : [Sort] 
-  ]
-  
-  AttributeDeclaration.DerivedAttribute = [
-    [VarId] : [Sort] = [Exp]
-  ]
-
   

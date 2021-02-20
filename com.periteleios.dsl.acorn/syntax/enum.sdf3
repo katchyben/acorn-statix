@@ -1,0 +1,18 @@
+module enum
+
+imports base
+
+context-free sorts
+  EnumValue 
+
+
+context-free syntax
+  Definition.Enum = [
+    enum [Id] 
+      [{EnumValue ","}*]
+    end enum
+  ]
+  
+  EnumValue.EnumValue = [[Id]]
+ 
+  EnumValue.EnumValueWithLabel = [[Id] ([STRING])]

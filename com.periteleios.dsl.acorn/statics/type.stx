@@ -11,10 +11,10 @@ imports signatures/type-sig
 signature
 
   constructors // semantic types
-    FUNCTION : list(TYPE) * TYPE  -> TYPE // list of arguments and return type
     ENTITY   : scope -> TYPE
     MOD      : scope -> TYPE
-
+    TRAIT : scope -> TYPE
+    ENUM : scope -> TYPE
     LIST : TYPE -> TYPE
     SET  : TYPE -> TYPE
     REF  : TYPE -> TYPE
@@ -41,8 +41,8 @@ signature
 
     NULL : TYPE
     ABSTRACTENTITY  : TYPE
-    
-
+    ABSTRACTENUM  : TYPE
+    ABSTRACTTRAIT  : TYPE
 
 rules // types of constant expressions
  typeOfExp(_, exp@Null()) = NULL() :-
@@ -59,6 +59,12 @@ rules // types of constant expressions
 
   typeOfExp(_, Const(exp@StringConst(_))) = STRING() :-
     @exp.type := STRING().
+    
+   typeOfExp(_, Const(exp@True())) = BOOL() :-
+    @exp.type := BOOL().
+
+  typeOfExp(_, Const(exp@False())) = BOOL() :-
+    @exp.type := BOOL().
     
     
 rules // map sorts to semantic types
@@ -77,15 +83,20 @@ rules // map sorts to semantic types
   typeOfSort(_, SimpleSort("Boolean")) = BOOL().
   typeOfSort(_, SimpleSort("UUID")) = UUID().
   typeOfSort(_, SimpleSort("Entity")) = ABSTRACTENTITY().
-
+  typeOfSort(_, SimpleSort("Trait")) = ABSTRACTTRAIT().
+  typeOfSort(_, SimpleSort("Enum")) = ABSTRACTENUM().
+  
   // in case it's not a built in simple sort, it must be an entity
   typeOfSort(s, SimpleSort(x)) = entityType(s, x).
+  //typeOfSort(s, SimpleSort(x)) = enumType(s, x).
+  //typeOfSort(s, SimpleSort(x)) = traitType(s, x).
+  
   typeOfSort(s, GenericSort("List", [innerSort])) = LIST(typeOfSort(s, innerSort)).
   typeOfSort(s, GenericSort(_, _)) = UNTYPED() :- false | error $[Only lists and sets with one type parameter are supported].
   typeOfSort(s, GenericSort("Set", [innerSort])) = SET(typeOfSort(s, innerSort)).
   typeOfSort(s, RefSort(innerSort)) = REF(typeOfSort(s, innerSort)).
 
-rules // WebDSL definition of being a simple type: built-in simple sort (no generics, no ref, no entity etc)
+rules 
 
   isSimpleType: TYPE -> BOOL
   isSimpleType(_) = FALSE(). // not a simple type by default
@@ -110,8 +121,19 @@ rules // resolve reference types
 
   entityType : scope * string -> TYPE
   entityType(s, e) = entity_type :- {e'}
-    typeOfDecl of Entity{e} in s |-> [(_, (Entity{e'}, entity_type))|_] | error $[Entity [e] is not defined],
+    typeOfDecl of Type{e} in s |-> [(_, (Type{e'}, entity_type))|_] | error $[Type [e] is not defined],
     @e.ref := e'.
+    
+  traitType : scope * string -> TYPE
+  traitType(s, e) = trait_type :- {e'}
+    typeOfDecl of Trait{e} in s |-> [(_, (Trait{e'}, trait_type))|_] | error $[Trait [e] is not defined],
+    @e.ref := e'.
+    
+  /*enumType : scope * string -> TYPE
+  enumType(s, e) = enum_type :- {e'}
+    typeOfDecl of Enum{e} in s |-> [(_, (Enum{e'}, enum_type))|_] | error $[Enum [e] is not defined],
+    @e.ref := e'.*/
+ 
 
   variableType : scope * string -> TYPE
   variableType(s, x) = t :- {x'}

@@ -1,0 +1,27 @@
+module statics/enum
+
+imports statics/base
+imports statics/type
+imports signatures/enum-sig
+
+rules
+  // enum x 
+  defOk(s, exp@Enum(x, bodydecs)) :- {s_enum enum_scopes}
+    new s_enum, s_enum -IMPORT-> s,
+    declEnum(s, s_enum, x, bodydecs).
+    
+    
+  declEnum : scope * scope * string * list(EnumValue)
+  declEnum(s, s_enum, enum_name, bodydecs) :- {enum_scopes}
+    s -> Type{enum_name} with typeOfDecl ENUM(s_enum),
+    typeOfDecl of Type{enum_name} in s |-> [(_, (_, ENUM(s_enum)))] | error $[Enum [enum_name] is defined multiple times] @enum_name,
+    enumValuesOk(s_enum, bodydecs).
+    
+  enumValueOk : scope * EnumValue
+  enumValuesOk maps enumValueOk(*, list(*))
+  
+  enumValueOk(s, EnumValue(x)).
+  enumValueOk(s, EnumValueWithLabel(x, l)).
+  
+  
+  

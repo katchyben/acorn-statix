@@ -3,19 +3,69 @@ module statics/built-ins
 imports statics/base
 imports statics/type
 
+imports signatures/built-ins-sig
+
 rules
 
-  declareBuiltIns : scope
-  declareBuiltIns(s) :-
-    s -> Function{"now"}      with typeOfDecl FUNCTION([], DATETIME()),
-    s -> Function{"today"}    with typeOfDecl FUNCTION([], DATE()),
-    s -> Function{"Date"}     with typeOfDecl FUNCTION([STRING(), STRING()], DATE()),
-    s -> Function{"Date"}     with typeOfDecl FUNCTION([STRING()], DATE()),
-    s -> Function{"Time"}     with typeOfDecl FUNCTION([STRING(), STRING()], DATE()),
-    s -> Function{"Time"}     with typeOfDecl FUNCTION([STRING()], DATE()),
-    s -> Function{"DateTime"} with typeOfDecl FUNCTION([STRING(), STRING()], DATE()),
-    s -> Function{"DateTime"} with typeOfDecl FUNCTION([STRING()], DATE()),
-    s -> Function{"random"}   with typeOfDecl FUNCTION([INT(), INT()], INT()),
-    s -> Function{"substring"} with  typeOfDecl FUNCTION([STRING(), INT(), INT()], STRING()),
-    s -> Function{"concat"}  with typeOfDecl FUNCTION([STRING(), STRING()], STRING()),
-    s -> Function{"random"} with typeOfDecl FUNCTION([INT()], INT()).
+   typeOfExp(s, Funcs(exp@Now())) = T :- 
+    DATETIME() == T  | error $[now() must have Datetime type],
+    @exp.type := T.
+    
+   typeOfExp(s, Funcs(exp@Today())) = T :- 
+    T == DATE() | error $[today() must have Date type],
+    @exp.type := T.
+    
+   typeOfExp(s, Funcs(exp@CurrentDate())) = T :- 
+    T == DATE() | error $[current_date() must have Date type],
+    @exp.type := T.
+  
+    
+   typeOfExp(s, Funcs(exp@Date(e1, e2))) = T :- 
+    typeOfExp(s, e1) == STRING(),
+    typeOfExp(s, e2) == STRING(),
+    T == DATE() | error $[Date() must have Date type],
+    @exp.type := T.
+    
+   typeOfExp(s, Funcs(exp@DateSub(e1, e2))) = T :- 
+    typeOfExp(s, e1) == STRING(),
+    typeOfExp(s, e2) == INT(),
+    T == DATE() | error $[date_sub() must have Date type],
+    @exp.type := T.
+    
+   typeOfExp(s, Funcs(exp@DateAdd(e1, e2))) = T :- 
+    typeOfExp(s, e1) == STRING(),
+    typeOfExp(s, e2) == INT(),
+    T == DATE() | error $[date_add() must have Date type],
+    @exp.type := T.
+  
+  
+   typeOfExp(s, Funcs(exp@Concat(e1, e2))) = T :- 
+    typeOfExp(s, e1) == STRING(),
+    typeOfExp(s, e2) == STRING(),
+    T == STRING() | error $[Concat() must have String type],
+    @exp.type := T.
+    
+    
+   typeOfExp(s, Funcs(exp@Hour(e))) = T :- 
+    typeOfExp(s, e) == STRING(),
+    T == INT() | error $[Hour() must have Integer type],
+    @exp.type := T.
+    
+   typeOfExp(s, Funcs(exp@ToDate(e))) = T :- 
+    typeOfExp(s, e) == STRING(),
+    T == DATE() | error $[to_date() must have Date type],
+    @exp.type := T.
+    
+    
+   typeOfExp(s, Funcs(exp@Year(e))) = T :- 
+    typeOfExp(s, e) == STRING(),
+    T == INT() | error $[Year() must have Integer type],
+    @exp.type := T.
+   
+   typeOfExp(s, Funcs(exp@Month(e))) = T :- 
+    typeOfExp(s, e) == STRING(),
+    T == INT() | error $[Month() must have Integer type],
+    @exp.type := T.
+   
+   
+   

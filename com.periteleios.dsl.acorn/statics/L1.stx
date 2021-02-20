@@ -9,7 +9,12 @@ imports statics/conditional
 imports statics/pattern
 imports statics/variable
 imports statics/entity
+imports statics/attribute
+imports statics/trait
+imports statics/enum
 imports statics/function
+imports statics/core
 imports statics/type
+imports statics/built-ins
 
 imports statics/file

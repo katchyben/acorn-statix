@@ -6,7 +6,6 @@ imports statics/type
 imports signatures/logical-sig
 
 
-
 rules
 
  // (e1 and e2)

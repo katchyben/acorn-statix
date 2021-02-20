@@ -2,6 +2,7 @@ module statics
 
 imports statics/L1
 imports statics/file
+imports statics/built-ins
 
 // see README.md for details on how to switch to multi-file analysis
 
@@ -10,7 +11,8 @@ rules // multi-file entry point
   projectOk : scope
 
   projectOk(s).
-  
+    
   fileOk : scope * Start 
   
-  fileOk(s, p) :- programOk(s, p). 
+  fileOk(s, p) :-
+     programOk(s, p). 

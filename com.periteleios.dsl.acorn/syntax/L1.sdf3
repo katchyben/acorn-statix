@@ -7,9 +7,14 @@ imports conditional
 imports pattern
 imports logical  
 imports entity  
+imports attribute
+imports trait
+imports enum
 imports function 
 imports variable 
 imports type 
+imports built-ins
+imports table
 imports file 
 
 

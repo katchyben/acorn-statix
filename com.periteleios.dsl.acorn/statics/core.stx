@@ -5,23 +5,22 @@ imports statics/type
 
 imports signatures/core-sig
 
+
 signature
   relations 
     mod : Id -> TYPE
       
 rules
     
-   declOk(s_global, Module(m, defns)) :- {s_mod}
-     new s_mod, s_mod -P-> s_global,
-     //s_mod -ROOT-> getRoot(s_global),
-     declareMod(s_global, m, MOD(s_mod)),
+   declOk(s, Module(m, defns)) :- {s_mod}
+     new s_mod, s_mod -P-> s,
+     declareMod(s, m, MOD(s_mod)),
      defsOk(s_mod, defns).
      
    defOk(s, Import(p)) :- {s_mod s_end}
      typeOfModRef(s, p) == MOD(s_mod),
      s -IMPORT-> s_mod.
-           
-      
+                
 rules
 
   declareMod : scope * Id * TYPE
@@ -49,62 +48,3 @@ rules
     @x.type := T, @x.ref := x'.
   
 
-rules
-
-  /*resolveRootMod : scope * Id -> list((path * (Id * scope)))
-  resolveRootMod(s, m) = mods :-
-    query mod
-      filter e and { m' :- m' == m }
-      min and true
-      in s |-> mods.
-  
-       
-  importedByApplicationRoot : scope * scope * string
-  importedByApplicationRoot(s_global, s_mod, mod) :- {s_app ps}
-    resolveRootMod(s_global, "_APPLICATION_SCOPE") == [(_, (_, s_app))],
-    query () filter IMPORT* and { s_app' :- s_app' == s_app }
-             min $ < IMPORT
-             in s_mod |-> ps,
-    ps != [] | error $[Module [mod] is not (transitively) imported by the application root] @mod.
-  
-    */    
-      
-/*rules // import definition rules
-
-  declareImportEnums : scope * string * list(Definition)
-  declareImportEnums(_, _, []).
-  declareImportEnums(s, x, [Enum(_, defs) | ss]) :-
-    declareImportEnums(s, x, ss).
-
- 
-
-      
-rules // extend module scopes
-
-  extendModuleScope : scope * string * scope
-  extendModuleScope(s_global, m, s) :- {modules}
-    resolveImport(s_global, m) == modules,
-    importModulesInScope(s_global, s, modules).
-
-  importModulesInScope : scope * scope * list((path * (string * string)))
-  importModulesInScope(_, _, []).
-  importModulesInScope(s_global, s, [(_, (_, mod)) | tl]) :-
-    importModuleInScope(s_global, s, mod),
-    importModulesInScope(s_global, s, tl).
-      
-   importModuleInScope : scope * scope * string
-   importModuleInScope(s_global, s, mod) :- {s_mod}
-     resolveMod(s_global, mod) == [(_, (_, s_mod))] | error $[Cannot resolve module [mod]],
-     s -IMPORT-> s_mod.
-
-   importedByApplicationRoot : scope * scope * string
-   importedByApplicationRoot(s_global, s_mod, mod) :- {s_app ps}
-     resolveMod(s_global, "_APPLICATION_SCOPE") == [(_, (_, s_app))],
-     query () filter IMPORT* and { s_app' :- s_app' == s_app }
-             min $ < IMPORT
-             in s_mod |-> ps,
-     ps != [] | error $[Module [mod] is not (transitively) imported by the application root] @mod.
-   */
-      
-      
-   

@@ -3,26 +3,30 @@ module pattern
 imports base
 imports type
 
-sorts Case Pat 
+sorts Case Pat DefaultCase
 
 context-free syntax // Pattern
   
   Exp.Match = [
      match [Exp] with 
-         [{Case "\n"}*]
-   ] {longest-match}  
+         [{Case "\n"}+]
+   ] {longest-match} 
    
-  Pat.PatVar = <<VarId>> 
-  Pat.PatConstr = <<VarId>>
-  Pat.PatApp = <<Pat> <Pat>> {left}
-  Pat.ExpTyped = [[VarId] : [Sort]]
-  Pat.ExpParens = [([Exp])]
-   
-  Case.Case = [case [Pat] -> [Exp]]
+  Pat.PVar = VarId
+  Pat.PLit = Literal
+  Pat.PatApp = [[Pat] [Pat]] {left}
+  Pat = [([Pat])] {bracket}
   
+  Case.Case = [case [Pat] -> [Exp]]
+  Case.DefaultCase = [case default -> [Exp]]
  
-    
+/*lexical syntax // reserved keywords  
+  KEYWORDS = 'case' {reject}  
+  KEYWORDS = 'default' {reject} */ 
+  
+  
 template options
   VarId = keyword {reject}
+ 
   keyword -/- [a-zA-Z0-9]
   

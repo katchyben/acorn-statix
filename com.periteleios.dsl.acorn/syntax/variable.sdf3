@@ -12,13 +12,13 @@ context-free syntax
   Exp.CollectionIndex = [[Exp] \[ [Exp] \]]
   FAExp.FAExp = [[Exp]]
   FAExp.FAVar = [[FAVarId]]
-  Exp.Cast = [[Exp] as [Sort]] 
+  Exp.Cast = [cast([Exp] as [Sort])] {prefer}
   
   Exp.VarDecl = [ [VarId] : [Sort]]
   Exp.VarDeclInit = [ [VarId] : [Sort] = [Exp]]
   Exp.VarDeclInitInferred = [[VarId] = [Exp]]
 
-  Exp.MapCreation = [ [Mapping+] ]
+  Exp.MapCreatio = [ [Mapping+] ]
   Mapping.Mapping = [[Exp] -> [Exp]]
   Exp.ListCreation = [\[ [{Exp ","}*] \]]
   Exp.SetCreation = [{ [{Exp ","}+] }]

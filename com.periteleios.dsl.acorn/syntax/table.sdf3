@@ -46,13 +46,13 @@ context-free syntax
   ColumnConstraint.Primary = [primary key key([Id])] {case-insensitive}
   ColumnConstraint.Rule = [rule [Exp]]
   	
-  ColumnType.Char = [char([Int])]
+  ColumnType.Char = [char([INT])]
   ColumnType.Varchar  = [varchar]
-  ColumnType.Decimal = [decimal([Int],[Int])]
+  ColumnType.Decimal = [decimal([INT],[INT])]
   ColumnType.IntColumnType = [int]
   ColumnType.IntegerColumnType = [tinyInteger]
   ColumnType.BigIntegerColumnType = [bigInteger]  
-  ColumnType.SmallIntegerColumnType = [smallIegernt]
+  ColumnType.SmallIntegerColumnType = [smallInteger]
   ColumnType.DateColumnType = [date]
   ColumnType.DateTimeColumnType = [datetime]
   ColumnType.ColumnTypeTimestamp = [timestamp]
