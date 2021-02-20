@@ -14,16 +14,13 @@ context-free syntax // Pattern
    
   Pat.PVar = VarId
   Pat.PLit = Literal
+  // Pat.PExp = Exp 
   Pat.PatApp = [[Pat] [Pat]] {left}
   Pat = [([Pat])] {bracket}
   
   Case.Case = [case [Pat] -> [Exp]]
   Case.DefaultCase = [case default -> [Exp]]
  
-/*lexical syntax // reserved keywords  
-  KEYWORDS = 'case' {reject}  
-  KEYWORDS = 'default' {reject} */ 
-  
   
 template options
   VarId = keyword {reject}

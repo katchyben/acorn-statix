@@ -51,8 +51,7 @@ context-free syntax
     import [ModuleName]
   ]
   
-   
-   
+  
 template options
   Id = keyword {reject}
   keyword -/- [a-zA-Z0-9]

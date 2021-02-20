@@ -129,11 +129,6 @@ rules // resolve reference types
     typeOfDecl of Trait{e} in s |-> [(_, (Trait{e'}, trait_type))|_] | error $[Trait [e] is not defined],
     @e.ref := e'.
     
-  /*enumType : scope * string -> TYPE
-  enumType(s, e) = enum_type :- {e'}
-    typeOfDecl of Enum{e} in s |-> [(_, (Enum{e'}, enum_type))|_] | error $[Enum [e] is not defined],
-    @e.ref := e'.*/
- 
 
   variableType : scope * string -> TYPE
   variableType(s, x) = t :- {x'}

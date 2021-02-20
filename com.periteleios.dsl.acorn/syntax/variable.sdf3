@@ -18,13 +18,13 @@ context-free syntax
   Exp.VarDeclInit = [ [VarId] : [Sort] = [Exp]]
   Exp.VarDeclInitInferred = [[VarId] = [Exp]]
 
-  Exp.MapCreatio = [ [Mapping+] ]
+  Exp.MapLiteral = [ [Mapping+] ]
   Mapping.Mapping = [[Exp] -> [Exp]]
-  Exp.ListCreation = [\[ [{Exp ","}*] \]]
-  Exp.SetCreation = [{ [{Exp ","}+] }]
+  Exp.ListLiteral = [\[ [{Exp ","}*] \]]
+  Exp.SetLiteral = [{ [{Exp ","}+] }]
   
-  Exp.TypedListCreation = [List \[ [Sort] \] ( [{Exp ","}*] )]
-  Exp.TypedSetCreation = [Set \[ [Sort] \] ( [{Exp ","}*] )]
+  Exp.TypedListLiteral = [List \[ [Sort] \] ( [{Exp ","}*] )]
+  Exp.TypedSetLiteral = [Set \[ [Sort] \] ( [{Exp ","}*] )]
 
 lexical syntax
 

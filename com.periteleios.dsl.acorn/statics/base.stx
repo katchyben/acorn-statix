@@ -178,8 +178,7 @@ rules // operations on types
   listLub([T|Ts]) = lub(T, listLub(Ts)).
   listLub([T1|[T2|[]]]) = lub(T1, T2).
   listLub([T1|[T2|rest]]) = listLub([lub(T1, T2) | rest]).
-  
-  
+ 
   equitype(T, T).
   
     
