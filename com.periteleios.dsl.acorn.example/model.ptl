@@ -1,10 +1,15 @@
 module model
  
     import crm 
+    import functions
+    import facets
     
     entity Test 
      attributes
        name : Integer
+        facets
+          ensure notNull()
+          ensure size(2, 4)
        employee : Employee
      identification
        key(name)
@@ -20,7 +25,7 @@ module model
         test5 : Date = today()
         test6 : Date = Date("12-20-1990", "MM-dd-yyyy")
         test7 : Date = to_date("12-20-1990")
-        test8 : Date = date_add("12-20-1990", 6 )
+        test8 : Date = date_add("12-20-1990", 6)
       identification
          key(name)
     end entity
@@ -42,11 +47,13 @@ module model
         test8 : Boolean
         test9 : Integer = hour("5")
         test10 : Integer = year("2020")
+        age : Integer = add(3, 9) + 18
+        
       identification
          key(test0)
     end entity	
     
-    
+      
     
     
     

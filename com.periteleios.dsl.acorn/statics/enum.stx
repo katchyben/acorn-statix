@@ -14,7 +14,8 @@ rules
   declEnum : scope * scope * string * list(EnumValue)
   declEnum(s, s_enum, enum_name, bodydecs) :- {enum_scopes}
     s -> Type{enum_name} with typeOfDecl ENUM(s_enum),
-    typeOfDecl of Type{enum_name} in s |-> [(_, (_, ENUM(s_enum)))] | error $[Enum [enum_name] is defined multiple times] @enum_name,
+    typeOfDecl of Type{enum_name} in s |-> [(_, (_, ENUM(s_enum)))] 
+    | error $[Enum [enum_name] is defined multiple times] @enum_name,
     enumValuesOk(s_enum, bodydecs).
     
   enumValueOk : scope * EnumValue

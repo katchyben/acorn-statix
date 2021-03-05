@@ -10,12 +10,14 @@ lexical syntax
   Id = [a-zA-Z] [a-zA-Z0-9\_]*
   ExtendedId = [a-zA-Z0-9\-\_\.]+
   ModuleName = {ExtendedId "/"}+
+  QId = [a-zA-Z\-\_] ("."? [a-zA-Z0-9\-\_\/])*
 
 lexical restrictions
 
   Id -/- [a-zA-Z0-9\_]
   ModuleName -/- [a-zA-Z0-9\/]
-
+  QId -/- [a-zA-Z0-9\-\_\.\/]
+  
 
 lexical syntax
 

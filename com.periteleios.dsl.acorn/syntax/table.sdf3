@@ -24,7 +24,7 @@ context-free syntax
    end table
   ]
  
-  TableDescription.MaterailizationForView = [materialization for view]
+  TableDescription.MaterializationForView = [materialization for view]
   TableDescription.SourceForEntity = [source for entity]
   
   Column.KeyColumn = [

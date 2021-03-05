@@ -1,0 +1,5 @@
+module facets
+    facet notNull()
+    facet size(x : Integer, y : Integer) on Integer
+    facet length(x : Integer)
+    

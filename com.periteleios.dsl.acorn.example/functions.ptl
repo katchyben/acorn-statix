@@ -1,1 +1,5 @@
 module functions
+  // User Defined Functions
+  func sumAll(nums : Integer) : Integer = impl java com.test.functions
+  func add(x : Integer, y : Integer) : Integer = impl python scripts/functions.py
+  

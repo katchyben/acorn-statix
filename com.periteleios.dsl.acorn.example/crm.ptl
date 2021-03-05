@@ -1,5 +1,5 @@
 module crm
-
+      
     enum Gender 
       Male ("Male"),
       Female ("Female")
@@ -47,9 +47,8 @@ module crm
       surname : String
       dob : Date
       gender : Boolean
-      age : Integer = 2
       height : Float = (1.0 > 2.0) ? 3.4 : 1.0
-      fullName : String = concat(name, surname)
+      fullName : String = concat(name, " ", surname)
       tested : Boolean = 2 in [1, 2, 3]
       counting : Integer = cast("3" as Integer) + cast(5 as Integer)
       amount : String = match (1 > 2) with
@@ -64,5 +63,14 @@ module crm
       key(name)
   end entity
   
-
-
+  entity Actor extends Person with GGts
+  
+  //facet required() 
+      
+  
+  
+ 
+  
+    
+  
+  

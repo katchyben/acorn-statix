@@ -23,64 +23,74 @@ signature
 
   namespaces
     Mod : string
-    Entity : string
-    Trait : string
     Function : string
     Variable : string
     Table : string
-    Enum : string
     Type : string
+    Facet : string
     
   name-resolution
     labels
-      P       // parent edge label for consecutive statements
-      F       // function edge label for embedding functions, templates and pages in a scope
-      EXTEND  // extend edge label for extending entities
+      P       // lexical parent edge label
       INHERIT // inherit edge label for subclasses
-      IMPORT  // import edge label for importing the global scope and other modules
-      ROOT    // Root scope
-      IMPL    // Implements label
-      
-     resolve
-      Mod
-      filter P* 
-      min $ < P, $ < IMPORT,  P < IMPORT 
+      IMPORT  // import edge label for importing other modules
+      IMPL    // Implements edge for trait label
       
     resolve
-      Entity
-      filter P* F* EXTEND? INHERIT* IMPORT* 
-      min $ < P, $ < F, $ < EXTEND, $ < INHERIT, 
-          $ < IMPORT, P < F, P < EXTEND, P < INHERIT, P < IMPORT, 
-          F < EXTEND, F < INHERIT, F < IMPORT, EXTEND < INHERIT, 
-          EXTEND < IMPORT, INHERIT < IMPORT
-     
+      Mod
+      filter P* IMPORT*
+      min $ < P, 
+          $ < IMPORT,  
+          P < IMPORT 
+      
     resolve
       Type
-      filter P* F* EXTEND? INHERIT* IMPORT* 
-      min $ < P, $ < F, $ < EXTEND, $ < INHERIT, 
-          $ < IMPORT, P < F, P < EXTEND, P < INHERIT, P < IMPORT, 
-          F < EXTEND, F < INHERIT, F < IMPORT, EXTEND < INHERIT, 
-          EXTEND < IMPORT, INHERIT < IMPORT
-          
-    resolve
-      Trait
-      filter P* F* EXTEND? INHERIT* IMPORT*
-      min $ < P, $ < F, $ < EXTEND, $ < INHERIT, $ < IMPORT, P < F, P < EXTEND, P < INHERIT, P < IMPORT, F < EXTEND, F < INHERIT, F < IMPORT, EXTEND < INHERIT, EXTEND < IMPORT, INHERIT < IMPORT
+      filter P* INHERIT* IMPORT* IMPL*
+       min $ < P, 
+           $ < INHERIT, 
+           $ < IMPORT,
+           $ < IMPL,  
+           P < INHERIT, 
+           P < IMPORT,
+           P < IMPL,
+           IMPL < INHERIT,
+           IMPL < IMPORT,
+           INHERIT < IMPORT
+           
     resolve
       Function
-      filter P* F* EXTEND? (INHERIT EXTEND?)* IMPORT*
+      filter P* IMPORT*
+      min $ < P, 
+          $ < IMPORT, 
+          P < IMPORT
+          
+    resolve
+      Facet
+      filter P* IMPORT*
+      min $ < P, 
+          $ < IMPORT, 
+          P < IMPORT
       
     resolve
       Variable
-      filter P* F* EXTEND? (INHERIT EXTEND?)* IMPORT*
-      min $ < P, $ < F, $ < EXTEND, $ < INHERIT, $ < IMPORT, P < F, P < EXTEND, P < INHERIT, P < IMPORT, F < EXTEND, F < INHERIT, F < IMPORT, EXTEND < INHERIT, EXTEND < IMPORT, INHERIT < IMPORT
-   
+      filter P* INHERIT* IMPORT* IMPL*
+      min $ < P,  
+          $ < INHERIT, 
+          $ < IMPORT,
+          $ < IMPL,  
+          P < INHERIT, 
+          P < IMPORT,
+          P < IMPL,
+          IMPL < INHERIT,
+          IMPL < IMPORT,
+          INHERIT < IMPORT
+          
+             
   relations
-    typeOfDecl         : occurrence -> TYPE
-    typeOfFunDecl      : occurrence -> FUNSIG
-    entity             : occurrence -> scope
+    typeOfDecl : occurrence -> TYPE
     typeOf : -> TYPE 
-    function : (string * scope) -> TYPE
+    function : FunId -> TYPE
+     
 
 rules // declare common rules and mappings
   
@@ -116,18 +126,18 @@ rules // typing
   typeCompatibleB(T, T) = TRUE(). // same type is always type compatible
   
 rules
-  /*typeOf : scope -> TYPE
+  typesOf maps typeOf(list(*)) = list(*)
+  typeOf : scope -> TYPE
   typeOf(s) = T :-
     query typeOf
       filter e and true
       min /* */ and true
       in s |-> [(_, T)].
-      
+          
   withType : TYPE -> scope
-    withType(T) = s :-
-    new s, !typeOf[T] in s.*/
-  
-  
+  withType(T) = s :-
+    new s, !typeOf[T] in s.
+      
   declVars : scope * list((string * TYPE))
   declVars(s, []).
   declVars(s, [(x, t)|tail]) :-
@@ -135,9 +145,9 @@ rules
     declVars(s, tail).
 
   declVar : scope * string * TYPE
-  declVar(s, x, t) :-
-    s -> Variable{x} with typeOfDecl t,
-    noDuplicateVarDefs(s, x) | error $[Duplicate defition of [x] in this context].
+  declVar(s, x, T) :-
+    s -> Variable{x} with typeOfDecl T,
+    noDuplicateVarDefs(s, x) | error $[Duplicate defiition of [x] in this context].
 
   noDuplicateVarDefs : scope * string
   noDuplicateVarDefs(s, x) :-
@@ -147,8 +157,8 @@ rules
 
   noDuplicateVarDefsInSuper : scope * string
   noDuplicateVarDefsInSuper(s_sub, x) :-
-    query typeOfDecl filter EXTEND? (INHERIT EXTEND?)* and { Variable{x'} :- x' == x }
-                     min $ < EXTEND, $ < INHERIT, EXTEND < INHERIT
+    query typeOfDecl filter INHERIT* and { Variable{x'} :- x' == x }
+                     min $ < INHERIT
                      in s_sub |-> [_].
    
 rules // well-typedness of ..
@@ -164,6 +174,15 @@ rules // operations on types
   equitype : TYPE * TYPE 
   
   subtype(T, T).
+  
+rules 
+  subtypes : list(TYPE) * list(TYPE)
+
+  subtypes([], []).
+
+  subtypes([T | Ts], [S | Ss]) :-
+    subtype(T, S),
+    subtypes(Ts, Ss).
   
   /**
    * listLub(list)
@@ -182,6 +201,7 @@ rules // operations on types
   equitype(T, T).
   
     
+    
 rules
   
   inherits : scope * scope -> BOOL
@@ -198,54 +218,42 @@ rules
 
   
 rules // function declaration and resolving
-
-  declareFunction : scope * string * list(TYPE) * TYPE
-  declareFunction(s, f, args, return) :-
-    !function[(f, new), FUNCTION(args, return)] in s.
-
-  resolveFunction : scope * string -> list((path * (string * TYPE)))
-  resolveFunction(s, f) = dropUniqueIds(ps) :-
-    query function filter P* F* EXTEND? (INHERIT EXTEND?)* IMPORT*
-                   and { f' :- f' == (f, _) }
-                   min $ < P, $ < F, $ < EXTEND, $ < INHERIT, $ < IMPORT, P < F, P < EXTEND, P < INHERIT, P < IMPORT, F < EXTEND, F < INHERIT, F < IMPORT, EXTEND < INHERIT, EXTEND < IMPORT, INHERIT < IMPORT
-                   and { id, id' :- (_, id) == (_, id') }
-                   in s |-> ps.
-  
-rules // utils
-
   /**
-   * getRoot(s)
-   * Get the root scope. The root scope is the scope passed to
-   * statics/project!projectOk.
-   * All scopes have a path to the root scope and all paths to the root scope
-   * end with a ROOT edge.
+   * Declare a function [name] with type [TYPE] in scope [s]
    */
-  getRoot : scope -> scope
-  getRoot(s) = s_root :- {occs}
-    query () filter P* ROOT in s |-> occs,
-    occs == [(_, s_root)] | error $[BUG: cannot resolve root scope from [s]. occs: [occs]].
+   
+  declareFunc : scope * string * TYPE
+  declareFunc(s, x, T) :-
+    s -> Function{x} with typeOfDecl T, 
+    noDuplicateFuncs(s, x) | error $[Duplicate definition of [x] [T] in this context], 
+    @x.type := T.
+    
+  noDuplicateFuncs : scope * string
+  noDuplicateFuncs(s, x) :-
+    query typeOfDecl filter P* and { Function{x'} :- x' == x }
+                     min $ < P
+                     in s |-> [_].
+   
   
+  typeOfFunc : scope * string -> TYPE        
+  typeOfFunc(s, x) = _  :- {T}
+      typeOfDecl of Function{x} in s |-> [(_, (_, T))].
+          
+                                  
+rules // utils
 
   andB : BOOL * BOOL -> BOOL
   andB(_, _) = FALSE().
   andB(TRUE(), TRUE()) = TRUE().
   
-
   orB : BOOL * BOOL -> BOOL
   orB(_, _) = FALSE().
   orB(TRUE(), _) = TRUE().
   orB(FALSE(), TRUE()) = TRUE().
 
- 
   equalB : BOOL * BOOL
   equalB(b, b).
   equalB(_, _) :- false.
-
-  minOfList : list(int) -> int
-  minOfList([]) = 100000.
-  minOfList([x|xs]) = z :- {y}
-    y == minOfList(xs),
-    z #= min(x,y).
 
   pathLength : path -> int
   pathLength(_PathEmpty(_)) = 0.
@@ -253,8 +261,4 @@ rules // utils
     x' == pathLength(p),
     x #= x' + 1.
     
-  // functional rule to drop the unique id (implemented as scope) from query results
-  dropUniqueIds maps dropUniqueId(list(*)) = list(*)
-  dropUniqueId : (path * ((string * scope) * TYPE)) -> (path * (string * TYPE))
-  dropUniqueId((p, ((x, id), t))) = (p, (x, t)).
   

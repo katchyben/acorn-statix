@@ -2,8 +2,10 @@ module statics/attribute
 
 imports statics/base
 imports statics/type
+imports statics/facet
 
 imports signatures/attribute-sig
+imports signatures/facet-sig
 
 
 rules
@@ -30,18 +32,33 @@ rules
   declEntityAttribute maps declAttributeDeclaration(*, list(*))
 
    // attribute
-  declAttributeDeclaration(s, Attribute(x, sort)) :- {sortType}
-    sortType == typeOfSort(s, sort),
-    inequalType(sortType, UNTYPED()) | error $[Cannot resolve type [sort]] @sort,
-    declAttribute(s, x, sortType).
+  declAttributeDeclaration(s, Attribute(x, t, constraints)) :- {T}
+    typeOfSort(s, t) == T,
+    inequalType(T, UNTYPED()) | error $[Cannot resolve type [t]] @t,
+    constraintsOk(s, constraints),
+    declAttribute(s, x, T).
 
   // derived attribute
-  declAttributeDeclaration(s, DerivedAttribute(x, sort, exp)) :- {sortType d_scope}
-    new d_scope,
-    d_scope -P-> s,
-    sortType == typeOfSort(s, sort),
-    equalType(sortType, typeOfExp(s, exp)) | error $[Expression [exp] must be of type [sort]] @exp,
-    declAttribute(s, x, sortType).
+  declAttributeDeclaration(s, DerivedAttribute(x, t, exp)) :- {T d_scope}
+    new d_scope, d_scope -P-> s,
+    typeOfSort(s, t) == T,
+    equalType(T, typeOfExp(s, exp)) | error $[Expression [exp] must be of type [t]] @exp,
+    declAttribute(s, x, T).
+    
+ rules
+   constraintsOk : scope * Constraints 
+   facetCallOk : scope * FacetCall
+   facetCallsOk maps facetCallOk(*, list(*))
+   
+   constraintsOk(s, NoConstraints())  :- true.
+   constraintsOk(s, Constraints(exps))  :- 
+     facetCallsOk(s, exps).
+     
+   facetCallOk(s, FacetCall(x, exps))  :- {Ts}
+     resolveFacet(s, x) == FacetType(Ts),
+     typesOfExps(s, exps) == Ts.
+  
+
        
  
  

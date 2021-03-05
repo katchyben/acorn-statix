@@ -16,7 +16,7 @@ context-free syntax
        
   BuiltIn.Date = [ Date([Exp], [Exp]) ] {prefer}
   
-  BuiltIn.Concat = [ concat([Exp], [Exp]) ] {prefer}
+  BuiltIn.Concat = [ concat([{Exp ","}*]) ] {prefer}
   
   BuiltIn.Year = [ year([Exp]) ] {prefer}
   

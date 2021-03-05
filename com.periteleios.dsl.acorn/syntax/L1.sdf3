@@ -14,15 +14,20 @@ imports function
 imports variable 
 imports type 
 imports built-ins
-imports table
+imports table 
+imports facet
 imports file 
 
 
 
 context-free priorities
-
+  { 
+    Exp.Funcs 
+  } >
+  {
+    FacetCall.FacetCall
+  } >
   {left :
-    Exp.Call
     Exp.FieldAccess
     Exp.CollectionIndex
   } >

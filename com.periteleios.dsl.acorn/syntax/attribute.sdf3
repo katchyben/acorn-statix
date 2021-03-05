@@ -1,6 +1,7 @@
 module attribute
 
 imports base
+imports facet
 
 context-free sorts
 
@@ -11,6 +12,7 @@ context-free syntax
   
   AttributeDeclaration.Attribute = [
     [VarId] : [Sort] 
+      [Constraints]
   ]
   
   AttributeDeclaration.DerivedAttribute = [

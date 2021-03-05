@@ -4,11 +4,6 @@ imports statics/base
 imports statics/type
 
 imports signatures/core-sig
-
-
-signature
-  relations 
-    mod : Id -> TYPE
       
 rules
     
@@ -24,27 +19,30 @@ rules
 rules
 
   declareMod : scope * Id * TYPE
-  resolveMod : scope * Id -> list((path * (Id * TYPE)))
   typeOfModRef : scope * Id -> TYPE
   
   declareMod(s, x, T) :- 
-    !mod[x, T] in s,
-    resolveMod(s, x) == [(_, (_, T))] 
+    s -> Mod{x} with typeOfDecl T,
+    typeOfDecl of Mod{x} in s |-> [(_, (_, T))] 
       | error $[Duplicate definition of module [x]], 
     @x.type := T.
     
-    
-  resolveMod(s, x) = ps :-
-    query mod
-      filter P* INHERIT*
-         and { x' :- x' == x }
-         min $ < INHERIT, $ < P, INHERIT < P
-         and true
-          in s |-> ps.
-  
   typeOfModRef(s, x) = T :- {x'} 
-    resolveMod(s, x) == [(_,(x', T))|_]
+    typeOfDecl of Mod{x} in s |-> [(_, (x', T))|_]
       | error $[Module [x] not defined],
     @x.type := T, @x.ref := x'.
+    
+    
+ rules
+  typeOfParam : scope * scope * Param -> TYPE
+  typeOfParams maps typeOfParam(*, *, list(*)) = list(*)
+  
+  /*typeOfParam(s_func, _, Param(t)) = T :-
+    typeOfSort(s_func, t) == T.*/
+
+  typeOfParam(s_func, s_mod, Param(x, t)) = T :- 
+    typeOfSort(s_func, t) == T,
+    declVar(s_func, x, T).
+   
   
 

@@ -5,42 +5,26 @@ imports core
 
 context-free sorts 
   ThisCall
-  OptSort 
-  Block 
-  Function
+  FuncImpl
+  FuncDef
 
 context-free syntax
-
-  //Exp.Fun = "function" "(" {ID ","}* ")" "{" Exp "}"
+    
+  FuncImpl.JavaFuncImpl = [impl java [QId]]
   
-  Function.Function = [ func [FunId] [OptFormalArgs] [OptSort] [Block] ]
+  FuncImpl.PythonFuncImpl = [impl python [QId]]
   
-  OptSort.OptSortNone = []
+  Definition.FuncDef  = [
+    func [FunId]([Params]) : [Sort] = [FuncImpl]
+  ]
   
-  OptSort.OptSortSome = [: [Sort]]
-  
-  Definition.GlobalFunction = [ [Function] ]
-  
-  Exp.FunctionExp = [func [OptFormalArgs] [OptSort] [Block]]
-  
-  Exp.FunctionRef = [func . [FunId] ( [{Sort ","}*] ) [OptSort]]
-  
-  Exp.FunctionRefCall = [func . [FunId] ( [{Sort ","}*] ) [OptSort] ( [{Exp ","}*] )]
-  
-  Exp.FunctionRefCallPartial = [func . [FunId] ( [{Sort ","}*] ) [OptSort] ( * , [{Exp ","}*] )]
-  
-  Block.Block = [{
-    [Exp*]
-  }]
-  
+    
 context-free syntax // function
 
   Exp = ThisCall
   
   ThisCall.ThisCall = [[FunId] ( [{Exp ","}*] )]
-  
-  Exp.Call = [[Exp].[Id] ( [{Exp ","}*] )]
-    
+      
   SimpleExp.SimpleThisCall = ThisCall
   
   SimpleExp.SimpleCall = [[SimpleExp] . [Id] ( [{Exp ","}*] )]

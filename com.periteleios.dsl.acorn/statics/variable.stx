@@ -13,13 +13,13 @@ signature
 
 rules // variables
 
-  typeOfExp(s, exp@Var(x)) = t :-
-    variableType(s, x) == t,
-    @exp.type := t.
+  typeOfExp(s, exp@Var(x)) = T :-
+    variableType(s, x) == T,
+    @exp.type := T.
   
-  typeOfSimpleExp(s, exp@SimpleVar(x)) = t :-
-    variableType(s, x) == t,
-    @exp.type := t.
+  typeOfSimpleExp(s, exp@SimpleVar(x)) = T :-
+    variableType(s, x) == T,
+    @exp.type := T.
 
   typeOfExp(s, FieldAccess(exp@FAVar(var), x)) = propertyType :- {s_entity varType}
     variableType(s, var) == varType,
@@ -44,45 +44,47 @@ rules // variables
   varDeclInitOk : scope * scope * Exp 
   varDeclInferredOk : scope * scope * Exp 
   
-  varDeclOk(s, s_decl, VarDecl(x, sort)) :- {t}
-    t == typeOfSort(s, sort),
-    inequalType(t, UNTYPED()) | error $[Unknown type [sort]] @sort,
-    declVar(s_decl, x, t).
+  varDeclOk(s, s_decl, VarDecl(x, sort)) :- {T}
+    T == typeOfSort(s, sort),
+    inequalType(T, UNTYPED()) | error $[Unknown type [sort]] @sort,
+    declVar(s_decl, x, T).
 
-  varDeclInitOk(s, s_decl, VarDeclInit(x, sort, exp)) :- {t}
-    t == typeOfSort(s, sort),
-    equalType(t, typeOfExp(s, exp)) | error $[Expression [exp] is not of type [sort]] @exp,
-    declVar(s_decl, x, t).
+  varDeclInitOk(s, s_decl, VarDeclInit(x, sort, exp)) :- {T}
+    T == typeOfSort(s, sort),
+    equalType(T, typeOfExp(s, exp)) | error $[Expression [exp] is not of type [sort]] @exp,
+    declVar(s_decl, x, T).
 
-  varDeclInferredOk(s, s_decl, VarDeclInitInferred(x, exp)) :- {t}
-    t == typeOfExp(s, exp),
-    inequalType(t, UNTYPED()) | error $[Unable to infer type of [exp]] @exp,
-    declVar(s_decl, x, t).
+  varDeclInferredOk(s, s_decl, VarDeclInitInferred(x, exp)) :- {T}
+    T == typeOfExp(s, exp),
+    inequalType(T, UNTYPED()) | error $[Unable to infer type of [exp]] @exp,
+    declVar(s_decl, x, T).
       
     
 rules // list and set creation
 
   typeOfExp(s, ListLiteral([])) = UNTYPED() :- false | error $[Type cannot be determined for empty untyped list creation].
-  typeOfExp(s, lc@ListLiteral([hd | tl])) = LIST(t) :-
-    t == typeOfExp(s, hd), // first element of the untyped list creation determines the type
-    typesCompatibleWith(t, typesOfExps(s, tl)) | error $[Not all elements are compatible with type [t]] @tl,
-    @lc.type := LIST(t).
+  typeOfExp(s, lc@ListLiteral([hd | tl])) = LIST(T) :-
+    T == typeOfExp(s, hd), // first element of the untyped list creation determines the type
+    typesCompatibleWith(T, typesOfExps(s, tl)) | error $[Not all elements are compatible with type [T]] @tl,
+    @lc.type := LIST(T).
 
-  typeOfExp(s, tlc@TypedListLiteral(sort, exps)) = LIST(t) :-
-    typeOfSort(s, sort) == t,
-    typesCompatibleWith(t, typesOfExps(s, exps)) | error $[Not all elements are compatible with type [t]] @exps,
-    @tlc.type := LIST(t).
+  typeOfExp(s, tlc@TypedListLiteral(sort, exps)) = LIST(T) :-
+    typeOfSort(s, sort) == T,
+    typesCompatibleWith(T, typesOfExps(s, exps)) | error $[Not all elements are compatible with type [T]] @exps,
+    @tlc.type := LIST(T).
 
   typeOfExp(s, SetLiteral([])) = UNTYPED() :- false | error $[Type cannot be determined for empty untyped set creation].
-  typeOfExp(s, sc@SetLiteral([hd | tl])) = SET(t) :-
-    t == typeOfExp(s, hd), // first element of the untyped set creation determines the type
-    typesCompatibleWith(t, typesOfExps(s, tl)) | error $[Not all elements are compatible with type [t]] @tl,
-    @sc.type := SET(t).
+  typeOfExp(s, sc@SetLiteral([hd | tl])) = SET(T) :-
+    T == typeOfExp(s, hd), // first element of the untyped set creation determines the type
+    typesCompatibleWith(T, typesOfExps(s, tl)) 
+    | error $[Not all elements are compatible with type [T]] @tl,
+    @sc.type := SET(T).
 
-  typeOfExp(s, tsc@TypedSetLiteral(sort, exps)) = SET(t) :-
-    typeOfSort(s, sort) == t,
-    typesCompatibleWith(t, typesOfExps(s, exps)) | error $[Not all elements are compatible with type [t]] @exps,
-    @tsc.type := SET(t).
+  typeOfExp(s, tsc@TypedSetLiteral(sort, exps)) = SET(T) :-
+    typeOfSort(s, sort) == T,
+    typesCompatibleWith(T, typesOfExps(s, exps)) 
+    | error $[Not all elements are compatible with type [T]] @exps,
+    @tsc.type := SET(T).
         
 rules // Cast
    typeOfExp(s, exp@Cast(e, t)) = T1 :- {T2}

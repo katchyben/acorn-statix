@@ -39,9 +39,9 @@ rules
     @exp.type := T.
   
   
-   typeOfExp(s, Funcs(exp@Concat(e1, e2))) = T :- 
-    typeOfExp(s, e1) == STRING(),
-    typeOfExp(s, e2) == STRING(),
+   typeOfExp(s, Funcs(exp@Concat([hd | tl]))) = T :- 
+    typeOfExp(s, hd) == T,
+    typesCompatibleWith(T, typesOfExps(s, tl)) | error $[Not all elements are compatible with type [T]] @tl,
     T == STRING() | error $[Concat() must have String type],
     @exp.type := T.
     

@@ -16,5 +16,5 @@ imports statics/function
 imports statics/core
 imports statics/type
 imports statics/built-ins
-
+imports statics/facet
 imports statics/file

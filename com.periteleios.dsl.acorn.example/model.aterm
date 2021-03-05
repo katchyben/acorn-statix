@@ -1,0 +1,20 @@
+Entity(
+  "Test"
+, NoExtends()
+, NoMixins()
+, [ Attribute(
+      "name"
+    , SimpleSort("Integer")
+    , Constraints(
+        [ FacetCall("required", [])
+        , FacetCall(
+            "size"
+          , [Const(Int("2")), Const(Int("4"))]
+          )
+        ]
+      )
+    )
+  , Attribute("employee", SimpleSort("Employee"), NoConstraints())
+  ]
+, Identification("name")
+)

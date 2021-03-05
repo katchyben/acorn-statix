@@ -14,7 +14,8 @@ lexical sorts
   FunId 
   Id 
   ExtendedId 
-  ModuleName 
+  ModuleName
+  QId 
 
 context-free sorts 
  Exp 

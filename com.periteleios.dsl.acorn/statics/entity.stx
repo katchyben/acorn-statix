@@ -11,22 +11,39 @@ rules // entity declaration
 
   // entity x : super 
   defOk(s, exp@Entity(x, super, mixins, bodydecs, key)) :- {s_entity s_super entity_scopes}
-    new s_entity, s_entity -IMPORT-> s,
+    new s_entity, s_entity -P-> s,
     extendsOk(s, s_entity, super),
     mixinsOk(s, s_entity, mixins),
     keyOk(s_entity, s, key),
     declEntity(s, s_entity, x, bodydecs).
     
+   defOk(s, exp@AbstractEntity(x, super, mixins)) :- {s_entity s_super entity_scopes}
+    new s_entity, s_entity -P-> s,
+    extendsOk(s, s_entity, super),
+    mixinsOk(s, s_entity, mixins),
+    declAbstractEntity(s, s_entity, x).
+ 
+    
   declEntity : scope * scope * string * list(AttributeDeclaration)
   declEntity(s, s_entity, entity_name, bodydecs) :- {entity_scopes}
     validEntityName(s_entity, entity_name),
     s -> Type{entity_name} with typeOfDecl ENTITY(s_entity),
-    typeOfDecl of Type{entity_name} in s |-> [(_, (_, ENTITY(s_entity)))] | error $[Entity [entity_name] is defined multiple times] @entity_name,
+    typeOfDecl of Type{entity_name} in s |-> [(_, (_, ENTITY(s_entity)))] 
+    | error $[Entity [entity_name] is defined multiple times] @entity_name,
     declEntityAttribute(s_entity, bodydecs).
+    
+  declAbstractEntity : scope * scope * string 
+  declAbstractEntity(s, s_entity, entity_name) :- {entity_scopes}
+    validEntityName(s_entity, entity_name),
+    s -> Type{entity_name} with typeOfDecl ENTITY(s_entity),
+    typeOfDecl of Type{entity_name} in s |-> [(_, (_, ENTITY(s_entity)))] 
+    | error $[Entity [entity_name] is defined multiple times] @entity_name.
+  
     
   validEntityName : scope * string
   validEntityName(s, x) :-
-    equalB(isSimpleType(typeOfSort(s, SimpleSort(x))), FALSE()) | error $[Entity name [x] is not allowed] @x,
+    equalB(isSimpleType(typeOfSort(s, SimpleSort(x))), FALSE()) 
+    | error $[Entity name [x] is not allowed] @x,
     x != "Entity" | error $[Entity name [x] is not allowed] @x.
   
   
@@ -52,14 +69,16 @@ rules // entity declaration
  mixinsOk : scope * scope * Mixins
  mixinsOk(_, _, NoMixins()).
  mixinsOk(s, s_entity, Mixins(x)) :- {s_pc}
-    typeOfDecl of Type{x} in s |-> [(_, (_, TRAIT(s_pc)))] | error $[Trait [x] is not defined],
-    s_entity -EXTEND-> s_pc.
+    typeOfDecl of Type{x} in s |-> [(_, (_, TRAIT(s_pc)))] 
+    | error $[Trait [x] is not defined],
+    s_entity -INHERIT-> s_pc.
     
 rules // resolve reference types
 
   attributeReference : scope * string -> TYPE
   attributeReference(s, x) = t :- {x'}
-    typeOfDecl of Variable{x} in s |-> [(_, (Variable{x'}, t))|_] | error $[Attribute [x] is not defined],
+    typeOfDecl of Variable{x} in s |-> [(_, (Variable{x'}, t))|_] 
+    | error $[Attribute [x] is not defined],
     @x.ref := x'.
 
 rules // subtyping

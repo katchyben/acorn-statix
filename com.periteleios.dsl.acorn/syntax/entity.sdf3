@@ -18,15 +18,10 @@ context-free syntax
     end entity
   ]
   
-  /*Definition.EntityNoSuper = [
-    entity [Id] 
-      attributes
-       [{AttributeDeclaration "\n"}*]
-      identification
-         key([Identification])
-    end entity
-  ]*/
-  
+   Definition.AbstractEntity =[
+     entity [Id] [Extends] [Mixins]
+  ]  
+ 
 
 context-free syntax
 

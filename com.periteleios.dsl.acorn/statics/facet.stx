@@ -1,0 +1,55 @@
+module statics/facet
+
+imports statics/base
+imports statics/type
+imports statics/core
+
+imports signatures/core-sig
+imports signatures/facet-sig
+
+signature
+  constructors   
+    FacetType : list(TYPE) -> TYPE
+
+
+rules // facets declaration
+
+  defOk(s, exp@Facet(x, Params(params), FacetTarget(ts))) :- {s_facet Ts T}
+    new s_facet, s_facet -P-> s,
+    typeOfParams(s_facet, s, params) == Ts,
+    typesOfSorts(s, ts) == T,
+    declareFacet(s, x, FacetType(Ts)).
+    
+  defOk(s, exp@Facet(x, Params(params), NoFacetTarget())) :- {s_facet Ts}
+    new s_facet, s_facet -P-> s,
+    typeOfParams(s_facet, s, params) == Ts,
+    declareFacet(s, x, FacetType(Ts)).
+    
+  typeOfExp(s, exp@FacetCall2Exp(FacetCall(x, argExps))) = T  :- {Ts Ss}
+    resolveFacet(s, x) == FacetType(Ts),
+    typesOfExps(s, argExps) == Ss,
+    subtypes(Ss, Ts).
+    
+  resolveFacet : scope * string -> TYPE
+  resolveFacet(s, x) = T :- {x'}
+    typeOfDecl of Facet{x} in s |-> [(_, (Facet{x'}, T))]
+    | error $[Facet [x] is not defined],
+    @x.ref := x'.
+    
+   
+ rules
+
+  declareFacet : scope * Id * TYPE
+  typeOfFacetRef : scope * Id -> TYPE
+  
+  declareFacet(s, x, T) :- 
+    s -> Facet{x} with typeOfDecl T,
+    typeOfDecl of Facet{x} in s |-> [(_, (_, T))] 
+      | error $[Duplicate definition of facet [x]], 
+    @x.type := T.
+    
+  typeOfFacetRef(s, x) = T :- {x'} 
+    typeOfDecl of Facet{x} in s |-> [(_, (x', T))|_]
+      | error $[Facet [x] not defined],
+    @x.type := T, @x.ref := x'.
+ 
