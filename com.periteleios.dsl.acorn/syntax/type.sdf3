@@ -1,0 +1,25 @@
+module type
+
+imports base
+
+  
+context-free sorts Literal 
+
+context-free syntax
+  
+  Exp.Null = [null]
+  Exp.Const = Literal
+  Literal.Int = INT
+  Literal.Long = LONG
+  Literal.Float = FLOAT
+  Literal.StringConst = STRING
+  Literal.True = [true]
+  Literal.False = [false]
+  
+lexical syntax
+
+  VarId = "true" {reject}
+  VarId = "false" {reject}
+  VarId = "null" {reject}
+  
+  

@@ -1,0 +1,57 @@
+module L1
+
+imports base
+imports arithmetic 
+imports relational 
+imports conditional
+imports pattern
+imports logical  
+imports entity  
+imports attribute
+imports trait
+imports enum
+imports function 
+imports variable 
+imports type 
+imports built-ins
+imports table 
+imports facet
+imports file 
+
+
+
+context-free priorities
+  { 
+    Exp.Funcs 
+  } >
+  {
+    FacetCall.FacetCall
+  } >
+  {left :
+    Exp.FieldAccess
+    Exp.CollectionIndex
+  } >
+  {non-assoc :
+    Exp.Cast
+    Exp.In
+  } >
+  {
+    Exp.Not
+  } >
+  {left :
+    Exp.Mul
+    Exp.Div
+    Exp.Mod
+  } >
+  {left:
+    Exp.Add
+    Exp.Sub
+  } >
+  {left :
+    Exp.Eq
+    Exp.Neq
+    Exp.Gt
+    Exp.Gte
+    Exp.Lt
+    Exp.Lte
+  } 

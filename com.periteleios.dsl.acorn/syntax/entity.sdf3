@@ -1,0 +1,36 @@
+module entity
+
+imports base
+imports attribute
+
+context-free sorts
+
+  Identification Mixins Extends
+
+context-free syntax
+
+  Definition.Entity = [
+    entity [Id] [Extends] [Mixins]
+      attributes
+       [{AttributeDeclaration "\n"}*]
+      identification
+       key([Identification])
+    end entity
+  ]
+  
+   Definition.AbstractEntity =[
+     entity [Id] [Extends] [Mixins]
+  ]  
+ 
+
+context-free syntax
+
+  Mixins.NoMixins = []
+  Mixins.Mixins = [with [Id]]
+  
+  Extends.NoExtends = []
+  Extends.Extends = [extends [Id]]
+
+  Identification.Identification = [[VarId]]
+  
+  

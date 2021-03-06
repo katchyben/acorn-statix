@@ -1,0 +1,13 @@
+module conditional
+
+imports base
+
+context-free syntax // Conditional
+  Exp.If  = [if ([Exp]) [Exp] else [Exp]] {right}
+  Exp.Ternary  = [[Exp] ? [Exp] : [Exp]] {right}
+  Exp.IfThen = [if ([Exp]) then [Exp] else [Exp]]
+   
+template options
+  Id = keyword {reject}
+  keyword -/- [a-zA-Z0-9]
+  

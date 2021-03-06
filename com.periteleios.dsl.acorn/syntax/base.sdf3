@@ -1,0 +1,36 @@
+module base
+
+imports lex
+
+lexical sorts  
+  INT
+  FLOAT 
+  LONG
+  STRING
+  SimpleSortLex 
+  GenericSortLex 
+  VarId 
+  FAVarId 
+  FunId 
+  Id 
+  ExtendedId 
+  ModuleName
+  QId 
+
+context-free sorts 
+ Exp 
+ Decl 
+ Bind 
+ Ref 
+ Definition 
+ SimpleSort 
+ SimpleExp 
+ Sort
+
+context-free syntax
+
+  Exp = [([Exp])] {bracket}
+  
+  
+
+  

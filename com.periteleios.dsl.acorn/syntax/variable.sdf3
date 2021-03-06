@@ -1,0 +1,48 @@
+module variable
+
+imports base
+
+context-free sorts
+  FAExp Mapping
+  
+context-free syntax
+  
+  Exp.Var = VarId
+  Exp.FieldAccess = [[FAExp] . [Id]]
+  Exp.CollectionIndex = [[Exp] \[ [Exp] \]]
+  FAExp.FAExp = [[Exp]]
+  FAExp.FAVar = [[FAVarId]]
+  Exp.Cast = [cast([Exp] as [Sort])] {prefer}
+  
+  Exp.VarDecl = [ [VarId] : [Sort]]
+  Exp.VarDeclInit = [ [VarId] : [Sort] = [Exp]]
+  Exp.VarDeclInitInferred = [[VarId] = [Exp]]
+
+  Exp.MapLiteral = [ [Mapping+] ]
+  Mapping.Mapping = [[Exp] -> [Exp]]
+  Exp.ListLiteral = [\[ [{Exp ","}*] \]]
+  Exp.SetLiteral = [{ [{Exp ","}+] }]
+  
+  Exp.TypedListLiteral = [List \[ [Sort] \] ( [{Exp ","}*] )]
+  Exp.TypedSetLiteral = [Set \[ [Sort] \] ( [{Exp ","}*] )]
+
+lexical syntax
+
+  VarId = "List" {reject}
+  VarId = "Set" {reject}
+  
+lexical syntax
+
+  VarId = "this" {reject}
+  VarId = "cast" {reject}
+
+
+context-free priorities
+
+  FAExp.FAExp <0> .> Exp.Var
+  
+
+template options
+  VarId = keyword {reject}
+  keyword -/- [a-zA-Z0-9]
+  

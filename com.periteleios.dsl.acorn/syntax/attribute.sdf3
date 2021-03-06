@@ -1,0 +1,21 @@
+module attribute
+
+imports base
+imports facet
+
+context-free sorts
+
+  AttributeDeclaration 
+ 
+context-free syntax
+
+  
+  AttributeDeclaration.Attribute = [
+    [VarId] : [Sort] 
+      [Constraints]
+  ]
+  
+  AttributeDeclaration.DerivedAttribute = [
+    [VarId] : [Sort] = [Exp]
+  ]
+
