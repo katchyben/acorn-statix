@@ -4,13 +4,23 @@ module model
     import functions
     import facets
     
+    enum TimeInterval
+      SECOND,
+      MINUTE,
+      HOUR,
+      DAY,
+      MONTH,
+      YEAR
+    end enum
+   
     entity Test 
      attributes
        name : Integer
         facets
-          ensure notNull()
-          ensure size(2, 4)
+          ensure NotNull()
+          ensure Size(2, 4)
        employee : Employee
+       time : TimeInterval
      identification
        key(name)
     end entity
@@ -26,17 +36,21 @@ module model
         test6 : Date = Date("12-20-1990", "MM-dd-yyyy")
         test7 : Date = to_date("12-20-1990")
         test8 : Date = date_add("12-20-1990", 6)
+        test9 : String = lpad("name", 4, "---")
+        test10 : String = rpad("name", 4, "---")
+        test11 : BigInteger = 8L
       identification
          key(name)
     end entity
-    
     
     entity Test3 
       attributes
         test0 : Test
         test1 : Integer = 5 + test2 + 2
         test2 : Integer
+        test2i : String = lower("test2")
         test3 : Integer = if (4 > 7) test2 else test1
+        test3i : String = lpad("test2",  4, "xxx")
         test4 : Test2
         test5 : Integer = test4.test.name
         test6 : String = test0.employee.party.name

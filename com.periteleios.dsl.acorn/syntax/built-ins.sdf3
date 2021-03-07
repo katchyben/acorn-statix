@@ -32,6 +32,16 @@ context-free syntax
   
   BuiltIn.DateAdd = [ date_add([Exp], [Exp]) ] {prefer}
   
+  BuiltIn.Lpad = [ lpad([Exp], [Exp], [Exp]) ] {prefer}
+  
+  BuiltIn.Rpad = [ rpad([Exp], [Exp], [Exp]) ] {prefer}
+  
+  BuiltIn.Lower = [ lower([Exp]) ] {prefer}
+  
+  BuiltIn.Lcase = [ lcase([Exp]) ] {prefer}
+  
+  BuiltIn.Ltrim = [ ltrim([Exp]) ] {prefer}
+  
   
   
   

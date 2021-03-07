@@ -66,7 +66,10 @@ rules // entity declaration
      typeOfDecl of Type{parent} in s |-> [(_, (_, ENTITY(s_super)))],
      s_entity -INHERIT-> s_super.
   
+ 
+ //mixinsDeclOk maps mixinsOk(*, *, list(*))
  mixinsOk : scope * scope * Mixins
+ 
  mixinsOk(_, _, NoMixins()).
  mixinsOk(s, s_entity, Mixins(x)) :- {s_pc}
     typeOfDecl of Type{x} in s |-> [(_, (_, TRAIT(s_pc)))] 

@@ -1,5 +1,6 @@
 module facets
-    facet notNull()
-    facet size(x : Integer, y : Integer) on Integer
-    facet length(x : Integer)
-    
+    facet NotNull()
+    facet Size(x : Integer, y : Integer) on Integer
+    facet Length(x : Integer)
+    facet Precision(x : Integer, y : Integer)
+    facet RegexPattern(x : String) on String

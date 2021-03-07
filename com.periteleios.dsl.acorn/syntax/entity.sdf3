@@ -24,9 +24,8 @@ context-free syntax
  
 
 context-free syntax
-
-  Mixins.NoMixins = []
-  Mixins.Mixins = [with [Id]]
+  Mixins.Mixins =  [with [Id]]
+  Mixins.NoMixins =  []
   
   Extends.NoExtends = []
   Extends.Extends = [extends [Id]]

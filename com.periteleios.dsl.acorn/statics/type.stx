@@ -73,6 +73,9 @@ rules // map sorts to semantic types
   
   typeOfSort(_, _) = UNTYPED(). // untyped by default
   typeOfSort(_, SimpleSort("Integer")) = INT().
+  typeOfSort(_, SimpleSort("BigInteger")) = LONG().
+  /*typeOfSort(_, SimpleSort("SmallInteger")) = SMALLINT().
+  typeOfSort(_, SimpleSort("TinyInteger")) = TINYINT().*/
   typeOfSort(_, SimpleSort("Float")) = FLOAT().
   typeOfSort(_, SimpleSort("Long")) = LONG().
   typeOfSort(_, SimpleSort("TimeInterval")) = TIMEINTERVAL().

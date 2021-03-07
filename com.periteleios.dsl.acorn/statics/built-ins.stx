@@ -66,6 +66,39 @@ rules
     typeOfExp(s, e) == STRING(),
     T == INT() | error $[Month() must have Integer type],
     @exp.type := T.
+    
+   typeOfExp(s, Funcs(exp@Lpad(e1, e2, e3))) = T :- 
+    typeOfExp(s, e1) == STRING(),
+    typeOfExp(s, e2) == INT(),
+    typeOfExp(s, e3) == STRING(),
+    T == STRING() | error $[lpad() must have String type],
+    @exp.type := T.
+    
+   typeOfExp(s, Funcs(exp@Rpad(e1, e2, e3))) = T :- 
+    typeOfExp(s, e1) == STRING(),
+    typeOfExp(s, e2) == INT(),
+    typeOfExp(s, e3) == STRING(),
+    T == STRING() | error $[lpad() must have String type],
+    @exp.type := T.
+    
+    
+   typeOfExp(s, Funcs(exp@Lower(e))) = T :- 
+    typeOfExp(s, e) == STRING(),
+    T == STRING() | error $[lower() must have String type],
+    @exp.type := T.
+    
+   typeOfExp(s, Funcs(exp@Lcase(e))) = T :- 
+    typeOfExp(s, e) == STRING(),
+    T == STRING() | error $[lcase() must have String type],
+    @exp.type := T.
+    
+   typeOfExp(s, Funcs(exp@Ltrim(e))) = T :- 
+    typeOfExp(s, e) == STRING(),
+    T == STRING() | error $[ltrim() must have String type],
+    @exp.type := T.
+    
+    
+  
    
    
    
